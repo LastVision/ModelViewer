@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="PreCompile">
+      <UniqueIdentifier>{7b98f407-3f83-4f2a-9f98-b3733ef579ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Message">
+      <UniqueIdentifier>{6db52398-7562-488d-8200-ded659236634}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MessageEnum">
+      <UniqueIdentifier>{1ea61717-2475-4611-b768-283394c81acc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Message\StateMessage">
+      <UniqueIdentifier>{d387a4d5-0a6e-4895-8fa3-78744878958f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>PreCompile</Filter>
+    </ClCompile>
+    <ClCompile Include="GameStateMessage.cpp">
+      <Filter>Message\StateMessage</Filter>
+    </ClCompile>
+    <ClCompile Include="PostMaster.cpp" />
+    <ClCompile Include="Subscriber.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>PreCompile</Filter>
+    </ClInclude>
+    <ClInclude Include="PostMaster.h" />
+    <ClInclude Include="Subscriber.h" />
+    <ClInclude Include="Message.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageEnum.h">
+      <Filter>MessageEnum</Filter>
+    </ClInclude>
+    <ClInclude Include="ResizeMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStateMessage.h">
+      <Filter>Message\StateMessage</Filter>
+    </ClInclude>
+    <ClInclude Include="OnClickMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="EmitterMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="OnRadioButtonMessage.h" />
+    <ClInclude Include="SetActiveMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyKilledMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="DefendTouchMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="RespawnTriggerMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="RespawnMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="SendTextToClientsMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="ActivateSpawnpointMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="PrintTextMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelLoadedMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="LevelCompleteMessage.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

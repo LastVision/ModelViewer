@@ -1,0 +1,43 @@
+
+
+Error message: Failed to Open XML File. File: Data/Resource/Entity/LI_Entity.xml, Error: XML_ERROR_FILE_NOT_FOUND
+
+File: c:\users\stdaca1\desktop\fps\programmering\solution\commonutilities\xmlreader.cpp
+Line: 54
+Function: XMLReader::OpenDocument
+
+
+
+Callstack
+c:\users\stdaca1\desktop\fps\programmering\solution\dl_debug\dl_debug.cpp (209): DL_Debug::Debug::AssertMessage
+
+c:\users\stdaca1\desktop\fps\programmering\solution\commonutilities\xmlreader.cpp (54): XMLReader::OpenDocument
+
+c:\users\stdaca1\desktop\fps\programmering\solution\entity\entityfactory.cpp (29): EntityFactory::LoadEntities
+
+c:\users\stdaca1\desktop\fps\programmering\solution\game_shared\sharedlevelfactory.cpp (17): SharedLevelFactory::SharedLevelFactory
+
+c:\users\stdaca1\desktop\fps\programmering\solution\game_server\serverlevelfactory.cpp (12): ServerLevelFactory::ServerLevelFactory
+
+c:\users\stdaca1\desktop\fps\programmering\solution\game_server\serveringamestate.cpp (12): ServerInGameState::ServerInGameState
+
+c:\users\stdaca1\desktop\fps\programmering\solution\game_server\servergame.cpp (17): ServerGame::Init
+
+c:\users\stdaca1\desktop\fps\programmering\solution\application_server\main.cpp (31): main
+
+f:\dd\vctools\crt\crtw32\dllstuff\crtexe.c (626): __tmainCRTStartup
+
+f:\dd\vctools\crt\crtw32\dllstuff\crtexe.c (466): mainCRTStartup
+
+ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 76E97C04)
+
+76E97C04 (KERNEL32): (filename not available): BaseThreadInitThunk
+
+ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 7754AB8F)
+
+7754AB8F (ntdll): (filename not available): RtlInitializeExceptionChain
+
+ERROR: SymGetLineFromAddr64, GetLastError: 487 (Address: 7754AB5A)
+
+7754AB5A (ntdll): (filename not available): RtlInitializeExceptionChain
+

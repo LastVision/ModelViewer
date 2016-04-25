@@ -1,0 +1,20 @@
+﻿Build started 4/15/2016 2:04:45 PM.
+     1>Project "c:\Users\stdaca1\Desktop\FPS\Programmering\Solution\Physics\Physics.vcxproj" on node 4 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W4 /WX- /sdl /Od /Oy- /D _MBCS /Gm /EHsc /RTC1 /MDd /GS /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Debug\Physics.pch" /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt -D_SCL_SECURE_NO_WARNINGS PhysicsManager.cpp
+         PhysicsManager.cpp
+     1>c:\users\stdaca1\desktop\fps\programmering\solution\physics\physicsmanager.cpp(609): warning C4239: nonstandard extension used : 'initializing' : conversion from 'physx::PxShapeFlags' to 'physx::PxShapeFlags &'
+                 A non-const reference may only be bound to an lvalue
+     1>c:\users\stdaca1\desktop\fps\programmering\solution\physics\physicsmanager.cpp(729): warning C4100: 'aDeltaTime' : unreferenced formal parameter
+     1>c:\users\stdaca1\desktop\fps\programmering\solution\physics\physicsmanager.cpp(833): warning C4189: 'changeLaterToAssert' : local variable is initialized but not referenced
+       Lib:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\Lib.exe /OUT:"C:\Users\stdaca1\Desktop\FPS\Programmering\Solution\Debug\Physics.lib" /NOLOGO Debug\PhysicsInterface.obj
+         Debug\PhysicsManager.obj
+         Debug\stdafx.obj
+         Debug\wavefront.obj
+         Physics.vcxproj -> C:\Users\stdaca1\Desktop\FPS\Programmering\Solution\Debug\Physics.lib
+     1>Done Building Project "c:\Users\stdaca1\Desktop\FPS\Programmering\Solution\Physics\Physics.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.32

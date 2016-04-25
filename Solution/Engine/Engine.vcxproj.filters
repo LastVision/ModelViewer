@@ -1,0 +1,483 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Precompile</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DirectX.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="FBX\FbxLoader.cpp">
+      <Filter>FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="FBXFactory.cpp">
+      <Filter>FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="PointLight.cpp">
+      <Filter>Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="SpotLight.cpp">
+      <Filter>Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemMonitor.cpp">
+      <Filter>DebugServices</Filter>
+    </ClCompile>
+    <ClCompile Include="Instance.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Surface.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Frustum.cpp" />
+    <ClCompile Include="Effect.cpp">
+      <Filter>Rendering\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectContainer.cpp">
+      <Filter>Rendering\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Rendering\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureContainer.cpp">
+      <Filter>Rendering\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseModel.cpp">
+      <Filter>Rendering\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Rendering\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelLoader.cpp">
+      <Filter>Rendering\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelProxy.cpp">
+      <Filter>Rendering\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugText.cpp">
+      <Filter>Rendering\DebugText</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugFont.cpp">
+      <Filter>Rendering\DebugText</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugFontContainer.cpp">
+      <Filter>Rendering\DebugText</Filter>
+    </ClCompile>
+    <ClCompile Include="Text.cpp">
+      <Filter>Rendering\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="TextFile.cpp">
+      <Filter>Rendering\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="TextParser.cpp">
+      <Filter>Rendering\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="Token.cpp">
+      <Filter>Rendering\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="FontFile.cpp">
+      <Filter>Rendering\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="Font.cpp">
+      <Filter>Rendering\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="FullScreenHelper.cpp">
+      <Filter>Rendering\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Rendering\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Tga32.cpp">
+      <Filter>Tga32</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Rendering\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationCurve.cpp">
+      <Filter>Rendering\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationNode.cpp">
+      <Filter>Rendering\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="HierarchyBone.cpp">
+      <Filter>Rendering\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformationNode.cpp">
+      <Filter>Rendering\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformationNodeCurves.cpp">
+      <Filter>Rendering\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformationNodeHierarchy.cpp">
+      <Filter>Rendering\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformationNodeInstance.cpp">
+      <Filter>Rendering\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelAnimated.cpp">
+      <Filter>Rendering\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugDrawer.cpp">
+      <Filter>DebugDrawer</Filter>
+    </ClCompile>
+    <ClCompile Include="Line3D.cpp">
+      <Filter>DebugDrawer</Filter>
+    </ClCompile>
+    <ClCompile Include="Line3DRenderer.cpp">
+      <Filter>DebugDrawer</Filter>
+    </ClCompile>
+    <ClCompile Include="Cube3D.cpp">
+      <Filter>DebugDrawer</Filter>
+    </ClCompile>
+    <ClCompile Include="Cube3DRenderer.cpp">
+      <Filter>DebugDrawer</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationSystem.cpp">
+      <Filter>Rendering\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationProxy.cpp">
+      <Filter>Rendering\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="DGFXLoader.cpp">
+      <Filter>FBX</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>Rendering\Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteProxy.cpp">
+      <Filter>Rendering\Sprite</Filter>
+    </ClCompile>
+    <ClCompile Include="InstancingHelper.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteAnimation.cpp">
+      <Filter>Rendering\SpriteAnimation</Filter>
+    </ClCompile>
+    <ClCompile Include="SpriteAnimator.cpp">
+      <Filter>Rendering\SpriteAnimation</Filter>
+    </ClCompile>
+    <ClCompile Include="SpotLightShadow.cpp">
+      <Filter>Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Bar3D.cpp" />
+    <ClCompile Include="Portal.cpp">
+      <Filter>Room</Filter>
+    </ClCompile>
+    <ClCompile Include="Room.cpp">
+      <Filter>Room</Filter>
+    </ClCompile>
+    <ClCompile Include="RoomManager.cpp">
+      <Filter>Room</Filter>
+    </ClCompile>
+    <ClCompile Include="DeferredRenderer.cpp">
+      <Filter>Rendering\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="FontProxy.cpp">
+      <Filter>Rendering\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="TextProxy.cpp">
+      <Filter>Rendering\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeMapGenerator.cpp">
+      <Filter>Rendering\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="SpotLightTextureProjection.cpp">
+      <Filter>Lights</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="stdafx.h">
+      <Filter>Precompile</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="DirectX.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexBufferWrapper.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBufferWrapper.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexDataWrapper.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexIndexWrapper.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="SetupInfo.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="FBX\FbxLoader.h">
+      <Filter>FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="FBXFactory.h">
+      <Filter>FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="VTuneApi.h">
+      <Filter>DebugServices</Filter>
+    </ClInclude>
+    <ClInclude Include="PointLight.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalLight.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="SpotLight.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="LightStructs.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectListener.h" />
+    <ClInclude Include="SystemMonitor.h">
+      <Filter>DebugServices</Filter>
+    </ClInclude>
+    <ClInclude Include="Instance.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertices.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Surface.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Frustum.h" />
+    <ClInclude Include="EngineEnums.h" />
+    <ClInclude Include="LodStructs.h">
+      <Filter>FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="Effect.h">
+      <Filter>Rendering\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectContainer.h">
+      <Filter>Rendering\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Rendering\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureContainer.h">
+      <Filter>Rendering\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseModel.h">
+      <Filter>Rendering\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Rendering\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelLoader.h">
+      <Filter>Rendering\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelProxy.h">
+      <Filter>Rendering\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugText.h">
+      <Filter>Rendering\DebugText</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugFont.h">
+      <Filter>Rendering\DebugText</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugFontContainer.h">
+      <Filter>Rendering\DebugText</Filter>
+    </ClInclude>
+    <ClInclude Include="Text.h">
+      <Filter>Rendering\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="TextFile.h">
+      <Filter>Rendering\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="TextParser.h">
+      <Filter>Rendering\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Token.h">
+      <Filter>Rendering\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="FontFile.h">
+      <Filter>Rendering\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Font.h">
+      <Filter>Rendering\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="FullScreenHelper.h">
+      <Filter>Rendering\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
+      <Filter>Rendering\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Tga32.h">
+      <Filter>Tga32</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>Rendering\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationCurve.h">
+      <Filter>Rendering\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationNode.h">
+      <Filter>Rendering\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="HierarchyBone.h">
+      <Filter>Rendering\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformationNode.h">
+      <Filter>Rendering\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformationNodeCurves.h">
+      <Filter>Rendering\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformationNodeHierarchy.h">
+      <Filter>Rendering\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformationNodeInstance.h">
+      <Filter>Rendering\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelAnimated.h">
+      <Filter>Rendering\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugDrawer.h">
+      <Filter>DebugDrawer</Filter>
+    </ClInclude>
+    <ClInclude Include="Line3D.h">
+      <Filter>DebugDrawer</Filter>
+    </ClInclude>
+    <ClInclude Include="Line3DRenderer.h">
+      <Filter>DebugDrawer</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube3D.h">
+      <Filter>DebugDrawer</Filter>
+    </ClInclude>
+    <ClInclude Include="Cube3DRenderer.h">
+      <Filter>DebugDrawer</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationSystem.h">
+      <Filter>Rendering\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationProxy.h">
+      <Filter>Rendering\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="DGFXLoader.h">
+      <Filter>FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureHelper.h">
+      <Filter>Rendering\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>Rendering\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteProxy.h">
+      <Filter>Rendering\Sprite</Filter>
+    </ClInclude>
+    <ClInclude Include="InstancingHelper.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteAnimation.h">
+      <Filter>Rendering\SpriteAnimation</Filter>
+    </ClInclude>
+    <ClInclude Include="SpriteAnimator.h">
+      <Filter>Rendering\SpriteAnimation</Filter>
+    </ClInclude>
+    <ClInclude Include="SpotLightShadow.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="IModelFactory.h">
+      <Filter>FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="DGFXFileFormat.h">
+      <Filter>FBX</Filter>
+    </ClInclude>
+    <ClInclude Include="BoneName.h">
+      <Filter>Rendering\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Bar3D.h" />
+    <ClInclude Include="Portal.h">
+      <Filter>Room</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.h">
+      <Filter>Room</Filter>
+    </ClInclude>
+    <ClInclude Include="RoomManager.h">
+      <Filter>Room</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferredRenderer.h">
+      <Filter>Rendering\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationData.h">
+      <Filter>Rendering\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="FontProxy.h">
+      <Filter>Rendering\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="CharacterData.h">
+      <Filter>Rendering\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="TextProxy.h">
+      <Filter>Rendering\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMapGenerator.h">
+      <Filter>Rendering\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="SpotLightTextureProjection.h">
+      <Filter>Lights</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Precompile">
+      <UniqueIdentifier>{60e037e0-b5db-4ba4-89e7-926b418d4716}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX">
+      <UniqueIdentifier>{4e45fc3e-08bd-402b-982d-47db849e325d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lights">
+      <UniqueIdentifier>{66e70d18-ed4b-4b98-9eff-c35077563ee6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FBX">
+      <UniqueIdentifier>{923b2b8b-c8a5-41fb-891a-0d4653b552b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DebugServices">
+      <UniqueIdentifier>{351a3e6e-50d2-43e1-823e-641c1538baa2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{bf7322d7-2e84-4f42-a427-99331b06f309}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Effect">
+      <UniqueIdentifier>{1117f290-3613-4c3a-8597-128b3d9aa91d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Texture">
+      <UniqueIdentifier>{2708954c-1f58-418a-807f-d200b4992301}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Model">
+      <UniqueIdentifier>{9d55b564-4db1-403d-926e-4c36e7a0a13c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\DebugText">
+      <UniqueIdentifier>{baf2e884-b972-4bc8-9638-b545b2737981}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Text">
+      <UniqueIdentifier>{c692a68a-c85e-4a75-9e93-03f0b69dd9e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tga32">
+      <UniqueIdentifier>{18b9410f-d7c0-46f2-af85-b20098396534}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Animation">
+      <UniqueIdentifier>{818116f3-0b61-43a9-aa31-5eb1ab31adf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DebugDrawer">
+      <UniqueIdentifier>{0a5d9478-d6ff-4442-b478-3cdd050b3b17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Sprite">
+      <UniqueIdentifier>{60336301-3065-4576-a4c9-e0a77c04a688}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\SpriteAnimation">
+      <UniqueIdentifier>{1431722e-37c1-41f6-91d2-020c2db12921}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Room">
+      <UniqueIdentifier>{f7a44424-c94b-40e1-a0ec-afe7f1d8612b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Renderer">
+      <UniqueIdentifier>{9eae83a0-4dc4-4207-9000-7994f620f042}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

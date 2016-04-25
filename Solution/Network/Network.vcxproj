@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E907E38A-6EF7-4CB7-BEC4-7076444557BD}</ProjectGuid>
+    <RootNamespace>Network</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)..\Libs\</OutDir>
+    <IntDir>$(SolutionDir)..\temp\$(ProjectName)\</IntDir>
+    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
+    <IncludePath>$(SolutionDir)\Memory;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)..\Libs\</OutDir>
+    <IntDir>$(SolutionDir)..\temp\$(ProjectName)\</IntDir>
+    <TargetName>$(ProjectName)_$(Configuration)</TargetName>
+    <IncludePath>$(SolutionDir)\Memory;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(SolutionDir)DL_Debug\;$(SolutionDir)CommonUtilities\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>_WINSOCK_DEPRECATED_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(SolutionDir)DL_Debug\;$(SolutionDir)CommonUtilities\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>_WINSOCK_DEPRECATED_NO_WARNINGS;RELEASE_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="ClientNetwork.h" />
+    <ClInclude Include="ConvertNetworkEnumToString.h" />
+    <ClInclude Include="NetImportantMessage.h" />
+    <ClInclude Include="NetMessage.h" />
+    <ClInclude Include="NetMessageActivateSpawnpoint.h" />
+    <ClInclude Include="NetMessageActivateUnit.h" />
+    <ClInclude Include="NetMessageAllClientsComplete.h" />
+    <ClInclude Include="NetMessageConnectReply.h" />
+    <ClInclude Include="NetMessageDisplayMarker.h" />
+    <ClInclude Include="NetMessageDisplayRespawn.h" />
+    <ClInclude Include="NetMessageEnemyShooting.h" />
+    <ClInclude Include="NetMessageEntityState.h" />
+    <ClInclude Include="NetMessageExplosion.h" />
+    <ClInclude Include="NetMessageHealth.h" />
+    <ClInclude Include="NetMessageHealthPack.h" />
+    <ClInclude Include="NetMessageKillServer.h" />
+    <ClInclude Include="NetMessageLevelComplete.h" />
+    <ClInclude Include="NetMessagePressE.h" />
+    <ClInclude Include="NetMessagePressEText.h" />
+    <ClInclude Include="NetMessageRayCastRequest.h" />
+    <ClInclude Include="NetMessageReplyServer.h" />
+    <ClInclude Include="NetMessageRequestConnect.h" />
+    <ClInclude Include="NetMessageDisconnect.h" />
+    <ClInclude Include="NetMessageImportantReply.h" />
+    <ClInclude Include="NetMessageLevelLoaded.h" />
+    <ClInclude Include="NetMessageOnDeath.h" />
+    <ClInclude Include="NetMessageOnHit.h" />
+    <ClInclude Include="NetMessageOnJoin.h" />
+    <ClInclude Include="NetMessagePingReply.h" />
+    <ClInclude Include="NetMessagePingRequest.h" />
+    <ClInclude Include="NetMessagePosition.h" />
+    <ClInclude Include="NetMessageRequestLevel.h" />
+    <ClInclude Include="NetMessageRequestServer.h" />
+    <ClInclude Include="NetMessageSetLevel.h" />
+    <ClInclude Include="NetMessageRequestStartLevel.h" />
+    <ClInclude Include="NetMessageSetActive.h" />
+    <ClInclude Include="NetMessageLoadLevel.h" />
+    <ClInclude Include="NetMessageShootGrenade.h" />
+    <ClInclude Include="NetMessageStartLobby.h" />
+    <ClInclude Include="NetMessageText.h" />
+    <ClInclude Include="NetworkMessageTypes.h" />
+    <ClInclude Include="NetworkSubscriber.h" />
+    <ClInclude Include="SerializeHelper.h" />
+    <ClInclude Include="ServerNetwork.h" />
+    <ClInclude Include="SharedNetworkManager.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Utility.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ClientNetwork.cpp" />
+    <ClCompile Include="NetMessage.cpp" />
+    <ClCompile Include="NetworkSubscriber.cpp" />
+    <ClCompile Include="ServerNetwork.cpp" />
+    <ClCompile Include="SharedNetworkManager.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommonUtilities\CommonUtilities.vcxproj">
+      <Project>{cf69d483-5bf1-4673-99e2-c04b953ca73c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\DL_Debug\DL_Debug.vcxproj">
+      <Project>{79d52050-1454-49c9-9186-ab74c959970e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Memory\Memory.vcxproj">
+      <Project>{25945336-03d1-42a6-8764-7ef11dbc42e6}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
