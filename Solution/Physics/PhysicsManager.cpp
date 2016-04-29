@@ -28,9 +28,6 @@
 #include <PxQueryReport.h>
 #include <TimerManager.h>
 #include "PhysicsComponentData.h"
-#include "../Entity/InputComponentData.h"
-#include "../Network/SharedNetworkManager.h"
-#include "../Network/NetMessageEntityState.h"
 #include "wavefront.h"
 #include "../InputWrapper/InputWrapper.h"
 #define MATERIAL_ID			0x01
@@ -310,30 +307,30 @@ myIsSwapping = false;
 			CU::Vector3<float> movement;
 			float magnitude = 0.f;
 			int count = 0;
-			if (CU::InputWrapper::GetInstance()->KeyIsPressed(DIK_S, CU::InputWrapper::eType::PHYSICS))
-			{
-				movement.z -= 1.f;
-				magnitude += myPlayerInputData->myBackwardMultiplier;
-				++count;
-			}
-			if (CU::InputWrapper::GetInstance()->KeyIsPressed(DIK_W, CU::InputWrapper::eType::PHYSICS))
-			{
-				movement.z += 1.f;
-				magnitude += myPlayerInputData->myForwardMultiplier;
-				++count;
-			}
-			if (CU::InputWrapper::GetInstance()->KeyIsPressed(DIK_A, CU::InputWrapper::eType::PHYSICS))
-			{
-				movement.x -= 1.f;
-				magnitude += myPlayerInputData->mySidewaysMultiplier;
-				++count;
-			}
-			if (CU::InputWrapper::GetInstance()->KeyIsPressed(DIK_D, CU::InputWrapper::eType::PHYSICS))
-			{
-				movement.x += 1.f;
-				magnitude += myPlayerInputData->mySidewaysMultiplier;
-				++count;
-			}
+			//if (CU::InputWrapper::GetInstance()->KeyIsPressed(DIK_S, CU::InputWrapper::eType::PHYSICS))
+			//{
+			//	movement.z -= 1.f;
+			//	magnitude += myPlayerInputData->myBackwardMultiplier;
+			//	++count;
+			//}
+			//if (CU::InputWrapper::GetInstance()->KeyIsPressed(DIK_W, CU::InputWrapper::eType::PHYSICS))
+			//{
+			//	movement.z += 1.f;
+			//	magnitude += myPlayerInputData->myForwardMultiplier;
+			//	++count;
+			//}
+			//if (CU::InputWrapper::GetInstance()->KeyIsPressed(DIK_A, CU::InputWrapper::eType::PHYSICS))
+			//{
+			//	movement.x -= 1.f;
+			//	magnitude += myPlayerInputData->mySidewaysMultiplier;
+			//	++count;
+			//}
+			//if (CU::InputWrapper::GetInstance()->KeyIsPressed(DIK_D, CU::InputWrapper::eType::PHYSICS))
+			//{
+			//	movement.x += 1.f;
+			//	magnitude += myPlayerInputData->mySidewaysMultiplier;
+			//	++count;
+			//}
 
 
 			if (count > 0)
@@ -346,13 +343,11 @@ myIsSwapping = false;
 				if (myState != eEntityState::IDLE)
 				{
 					myState = eEntityState::IDLE;
-					SharedNetworkManager::GetInstance()->AddMessage<NetMessageEntityState>(NetMessageEntityState(myState, myPlayerGID));
 				}
 			}
 			else if (myState != eEntityState::WALK)
 			{
 				myState = eEntityState::WALK;
-				SharedNetworkManager::GetInstance()->AddMessage<NetMessageEntityState>(NetMessageEntityState(myState, myPlayerGID));
 			}
 
 			bool isSprinting = false;
@@ -360,22 +355,22 @@ myIsSwapping = false;
 			bool previousOverheat = myIsOverheated;
 			if (CU::InputWrapper::GetInstance()->KeyIsPressed(DIK_LSHIFT, CU::InputWrapper::eType::PHYSICS))
 			{
-				if (mySprintEnergy < myPlayerInputData->myMaxSprintEnergy && myIsOverheated == false)
-				{
-					mySprintEnergy += myPlayerInputData->mySprintIncrease * myTimestep;
-					if (mySprintEnergy >= myPlayerInputData->myMaxSprintEnergy)
-					{
-						myIsOverheated = true;
-					}
-
-					if (movement.z > 0.f)
-					{
-						movement.z *= myPlayerInputData->mySprintMultiplier;
-						isSprinting = true;
-					}
-
-					shouldDecreaseEnergy = false;
-				}
+				//if (mySprintEnergy < myPlayerInputData->myMaxSprintEnergy && myIsOverheated == false)
+				//{
+				//	mySprintEnergy += myPlayerInputData->mySprintIncrease * myTimestep;
+				//	if (mySprintEnergy >= myPlayerInputData->myMaxSprintEnergy)
+				//	{
+				//		myIsOverheated = true;
+				//	}
+				//
+				//	if (movement.z > 0.f)
+				//	{
+				//		movement.z *= myPlayerInputData->mySprintMultiplier;
+				//		isSprinting = true;
+				//	}
+				//
+				//	shouldDecreaseEnergy = false;
+				//}
 			}
 
 
@@ -402,31 +397,31 @@ myIsSwapping = false;
 
 			if (shouldDecreaseEnergy == true && CU::InputWrapper::GetInstance()->KeyIsPressed(DIK_LSHIFT, CU::InputWrapper::eType::PHYSICS) == false)
 			{
-				mySprintEnergy -= myPlayerInputData->mySprintDecrease * myTimestep;
-				mySprintEnergy = fmaxf(mySprintEnergy, 0.f);
+				//mySprintEnergy -= myPlayerInputData->mySprintDecrease * myTimestep;
+				//mySprintEnergy = fmaxf(mySprintEnergy, 0.f);
 			}
 
-			if (myIsOverheated == true && mySprintEnergy <= 0.f)
-			{
-				myIsOverheated = false;
-			}
+			//if (myIsOverheated == true && mySprintEnergy <= 0.f)
+			//{
+			//	myIsOverheated = false;
+			//}
 
 			/*if (CU::InputWrapper::GetInstance()->KeyIsPressed(DIK_LSHIFT))
 			{
 			movement *= myPlayerInputData->mySprintMultiplier;
 			}*/
 
-			movement = movement * (*myPlayerOrientation);
-			movement.y = 0.f;
-			CU::Normalize(movement);
-			movement *= myPlayerInputData->mySpeed * magnitude;
-
-			if (isSprinting == true)
-			{
-				movement *= myPlayerInputData->mySprintMultiplier;
-			}
-			movement.y = myVerticalSpeed;
-			Move(myPlayerCapsule, movement, 0.05f, 1.f / 60.f);
+			//movement = movement * (*myPlayerOrientation);
+			//movement.y = 0.f;
+			//CU::Normalize(movement);
+			//movement *= myPlayerInputData->mySpeed * magnitude;
+			//
+			//if (isSprinting == true)
+			//{
+			//	movement *= myPlayerInputData->mySprintMultiplier;
+			//}
+			//movement.y = myVerticalSpeed;
+			//Move(myPlayerCapsule, movement, 0.05f, 1.f / 60.f);
 
 		}
 

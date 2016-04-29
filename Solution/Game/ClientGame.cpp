@@ -3,7 +3,6 @@
 #include <AnimationSystem.h>
 #include <AudioInterface.h>
 #include <Camera.h>
-#include "ClientNetworkManager.h"
 #include <ColoursForBG.h>
 #include <CommonHelper.h>
 #include "Console.h"
@@ -11,7 +10,6 @@
 #include <DebugFont.h>
 #include <Engine.h>
 #include <EntityFactory.h>
-#include <FadeMessage.h>
 #include <FileWatcher.h>
 #include "ClientGame.h"
 #include <InputWrapper.h>
@@ -29,7 +27,7 @@
 #include <VTuneApi.h>
 #include <Vector.h>
 #include <XMLReader.h>
-
+#include "InGameState.h"
 
 
 ClientGame::ClientGame()
@@ -43,8 +41,6 @@ ClientGame::ClientGame()
 #endif
 {
 	PostMaster::Create();
-	ClientNetworkManager::Create();
-	ClientNetworkManager::GetInstance()->StartNetwork();
 	Prism::Audio::AudioInterface::CreateInstance();
 
 	Prism::Audio::AudioInterface::GetInstance()->Init("Data/Resource/Sound/Init.bnk");
@@ -69,7 +65,6 @@ ClientGame::~ClientGame()
 	Console::Destroy();
 	myStateStack.Clear();
 	Prism::DebugDrawer::Destroy();
-	ClientNetworkManager::Destroy();
 	EntityFactory::Destroy();
 	PostMaster::Destroy();
 //	NetworkManager::Destroy();
@@ -86,11 +81,11 @@ bool ClientGame::Init(HWND& aHwnd)
 	CU::InputWrapper::Create(aHwnd, GetModuleHandle(NULL), DISCL_NONEXCLUSIVE
 		| DISCL_FOREGROUND, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
 
-
+	myTimerManager = new CU::TimerManager();
 
 
 	//Console::GetInstance(); // needed to create console here
-	myStateStack.PushMainGameState(new MainMenuState());
+	myStateStack.PushMainGameState(new InGameState(0));
 
 	//PostMaster::GetInstance()->SendMessage(GameStateMessage(eGameState::LOAD_GAME, 1));
 	GAME_LOG("Init Successful");
@@ -149,7 +144,6 @@ bool ClientGame::Update()
 	myCursor->Render();
 	
 	Prism::DebugDrawer::GetInstance()->RenderTextToScreen(); //Have to be last
-	ClientNetworkManager::GetInstance()->Update(deltaTime);
 	return true;
 }
 
@@ -170,9 +164,4 @@ void ClientGame::OnResize(int aWidth, int aHeight)
 	myStateStack.OnResize(aWidth, aHeight);
 	myCursor->OnResize(aWidth, aHeight);
 	PostMaster::GetInstance()->SendMessage(ResizeMessage(aWidth, aHeight));
-}
-
-void ClientGame::ReceiveMessage(const FadeMessage& aMessage)
-{
-	Prism::Engine::GetInstance()->StartFade(aMessage.myDuration);
 }

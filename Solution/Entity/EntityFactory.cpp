@@ -95,11 +95,8 @@ void EntityFactory::LoadEntity(const char* aEntityPath)
 		e = entityDocument.FindNextElement(e))
 	{
 		std::string elementName = CU::ToLower(e->Name());
-		if (elementName == CU::ToLower("AIComponent"))
-		{
-			myComponentLoader->LoadAIComponent(entityDocument, e, newData.myAIComponentData);
-		}
-		else if (elementName == CU::ToLower("AnimationComponent"))
+		
+		if (elementName == CU::ToLower("AnimationComponent"))
 		{
 			if (newData.myGraphicsData.myExistsInEntity == true) DL_ASSERT("You have a GraphicsComponent so you can't have a AnimationComponent");
 			if (newData.myAnimationData.myExistsInEntity == true) DL_ASSERT("You already have a AnimationComponent");
@@ -113,61 +110,17 @@ void EntityFactory::LoadEntity(const char* aEntityPath)
 
 			myComponentLoader->LoadGraphicsComponent(entityDocument, e, newData.myGraphicsData);
 		}
-		else if (elementName == CU::ToLower("GrenadeComponent"))
-		{
-			myComponentLoader->LoadGrenadeComponent(entityDocument, e, newData.myGrenadeData);
-		}
-		else if (elementName == CU::ToLower("NetworkComponent"))
-		{
-			myComponentLoader->LoadNetworkComponent(entityDocument, e, newData.myNetworkData);
-		}
-		else if (elementName == CU::ToLower("HealthComponent"))
-		{
-			myComponentLoader->LoadHealthComponent(entityDocument, e, newData.myHealthData);
-		}
 		else if (elementName == CU::ToLower("TriggerComponent"))
 		{
 			myComponentLoader->LoadTriggerComponent(entityDocument, e, newData.myTriggerData);
-		}
-		else if (elementName == CU::ToLower("InputComponent"))
-		{
-			myComponentLoader->LoadInputComponent(entityDocument, e, newData.myInputData);
-		}
-		else if (elementName == CU::ToLower("ShootingComponent"))
-		{
-			myComponentLoader->LoadShootingComponent(entityDocument, e, newData.myShootingData);
-		}
-		else if (elementName == CU::ToLower("SpawnpointComponent"))
-		{
-			myComponentLoader->LoadSpawnpointComponent(entityDocument, e, newData.mySpawnpointData);
-		}
-		else if (elementName == CU::ToLower("UpgradeComponent"))
-		{
-			myComponentLoader->LoadUpgradeComponent(entityDocument, e, newData.myUpgradeData);
-		}
-		else if (elementName == CU::ToLower("FirstPersonRenderComponent"))
-		{
-			myComponentLoader->LoadFirstPersonRenderComponent(entityDocument, e, newData.myFirstPersonRenderData);
 		}
 		else if (elementName == CU::ToLower("PhysicsComponent"))
 		{
 			myComponentLoader->LoadPhysicsComponent(entityDocument, e, newData.myPhysicsData);
 		}
-		else if (elementName == CU::ToLower("BulletComponent"))
-		{
-			myComponentLoader->LoadBulletComponent(entityDocument, e, newData.myProjecileData);
-		}
 		else if (elementName == CU::ToLower("SoundComponent"))
 		{
 			myComponentLoader->LoadSoundComponent(entityDocument, e, newData.mySoundData);
-		}
-		else if (elementName == CU::ToLower("RotationComponent"))
-		{
-			myComponentLoader->LoadRotationComponent(entityDocument, e, newData.myRotationData);
-		}
-		else if (elementName == CU::ToLower("VisualExplosionComponent"))
-		{
-			myComponentLoader->LoadVisualExplosionComponent(entityDocument, e, newData.myVisualExplosionData);
 		}
 		else
 		{

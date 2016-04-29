@@ -5,7 +5,6 @@
 #include <Engine.h>
 #include "GUIManager.h"
 #include "../InputWrapper/InputWrapper.h"
-#include "RadioButtonContainer.h"
 #include "SpriteWidget.h"
 #include "WidgetContainer.h"
 
@@ -216,11 +215,6 @@ namespace GUI
 				{
 					SpriteWidget* spriteWidget = new SpriteWidget(&aReader, widgetElement);
 					container->AddWidget(spriteWidget);
-				}
-				else if (type == "radioButtonContainer")
-				{
-					RadioButtonContainer* widget = new RadioButtonContainer(&aReader, widgetElement);
-					container->AddWidget(widget);
 				}
 				else
 				{

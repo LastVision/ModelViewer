@@ -28,12 +28,6 @@
     <Filter Include="EntityFactory\Component">
       <UniqueIdentifier>{d78471a9-14e8-41c7-8352-3d64f1f6778b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Weapon">
-      <UniqueIdentifier>{bb49f49e-fabb-452b-8e46-c4a02fac7e1d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Behavior">
-      <UniqueIdentifier>{3a0fb7b1-9c95-4a4d-964f-ab01c665a244}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -59,74 +53,13 @@
     <ClCompile Include="EntityEnumConverter.cpp">
       <Filter>EntityEnum</Filter>
     </ClCompile>
-    <ClCompile Include="HealthComponent.cpp">
-      <Filter>Component</Filter>
-    </ClCompile>
     <ClCompile Include="TriggerComponent.cpp">
-      <Filter>Component</Filter>
-    </ClCompile>
-    <ClCompile Include="InputComponent.cpp">
-      <Filter>Component</Filter>
-    </ClCompile>
-    <ClCompile Include="GrenadeLauncher.cpp">
-      <Filter>Weapon</Filter>
-    </ClCompile>
-    <ClCompile Include="Pistol.cpp">
-      <Filter>Weapon</Filter>
-    </ClCompile>
-    <ClCompile Include="Shotgun.cpp">
-      <Filter>Weapon</Filter>
-    </ClCompile>
-    <ClCompile Include="Weapon.cpp">
-      <Filter>Weapon</Filter>
-    </ClCompile>
-    <ClCompile Include="ShootingComponent.cpp">
-      <Filter>Component</Filter>
-    </ClCompile>
-    <ClCompile Include="FirstPersonRenderComponent.cpp">
-      <Filter>Component</Filter>
-    </ClCompile>
-    <ClCompile Include="NetworkComponent.cpp">
       <Filter>Component</Filter>
     </ClCompile>
     <ClCompile Include="PhysicsComponent.cpp">
       <Filter>Component</Filter>
     </ClCompile>
-    <ClCompile Include="UpgradeComponent.cpp">
-      <Filter>Component</Filter>
-    </ClCompile>
-    <ClCompile Include="AIComponent.cpp">
-      <Filter>Component</Filter>
-    </ClCompile>
-    <ClCompile Include="GrenadeComponent.cpp">
-      <Filter>Component</Filter>
-    </ClCompile>
-    <ClCompile Include="ArriveBehavior.cpp">
-      <Filter>Behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="Behavior.cpp">
-      <Filter>Behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="BlendedBehavior.cpp">
-      <Filter>Behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="EvadeBehavior.cpp">
-      <Filter>Behavior</Filter>
-    </ClCompile>
-    <ClCompile Include="BulletComponent.cpp">
-      <Filter>Component</Filter>
-    </ClCompile>
-    <ClCompile Include="SpawnpointComponent.cpp">
-      <Filter>Component</Filter>
-    </ClCompile>
-    <ClCompile Include="SharedUnitManager.cpp" />
     <ClCompile Include="SoundComponent.cpp">
-      <Filter>Component</Filter>
-    </ClCompile>
-    <ClCompile Include="RotationComponent.cpp">
-      <Filter>Component</Filter>
-    </ClCompile>
-    <ClCompile Include="VisualExplosionComponent.cpp">
       <Filter>Component</Filter>
     </ClCompile>
   </ItemGroup>
@@ -159,24 +92,9 @@
     <ClInclude Include="ComponentLoader.h">
       <Filter>EntityFactory\Component</Filter>
     </ClInclude>
-    <ClInclude Include="DamageNote.h">
-      <Filter>Notes</Filter>
-    </ClInclude>
     <ClInclude Include="PollingStation.h" />
     <ClInclude Include="EntityEnumConverter.h">
       <Filter>EntityEnum</Filter>
-    </ClInclude>
-    <ClInclude Include="BehaviorNote.h">
-      <Filter>Notes</Filter>
-    </ClInclude>
-    <ClInclude Include="ShootNote.h">
-      <Filter>Notes</Filter>
-    </ClInclude>
-    <ClInclude Include="HealthComponent.h">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="HealthComponentData.h">
-      <Filter>EntityFactory\EntityData\ComponentData</Filter>
     </ClInclude>
     <ClInclude Include="TriggerComponent.h">
       <Filter>Component</Filter>
@@ -184,114 +102,17 @@
     <ClInclude Include="TriggerComponentData.h">
       <Filter>EntityFactory\EntityData\ComponentData</Filter>
     </ClInclude>
-    <ClInclude Include="NetworkComponentData.h">
-      <Filter>EntityFactory\EntityData\ComponentData</Filter>
-    </ClInclude>
-    <ClInclude Include="InputComponent.h">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="GrenadeLauncher.h">
-      <Filter>Weapon</Filter>
-    </ClInclude>
-    <ClInclude Include="Pistol.h">
-      <Filter>Weapon</Filter>
-    </ClInclude>
-    <ClInclude Include="Shotgun.h">
-      <Filter>Weapon</Filter>
-    </ClInclude>
-    <ClInclude Include="Weapon.h">
-      <Filter>Weapon</Filter>
-    </ClInclude>
-    <ClInclude Include="InputComponentData.h">
-      <Filter>EntityFactory\EntityData\ComponentData</Filter>
-    </ClInclude>
-    <ClInclude Include="ShootingComponent.h">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="ShootingComponentData.h">
-      <Filter>EntityFactory\EntityData\ComponentData</Filter>
-    </ClInclude>
-    <ClInclude Include="FirstPersonRenderComponentData.h">
-      <Filter>EntityFactory\EntityData\ComponentData</Filter>
-    </ClInclude>
-    <ClInclude Include="FirstPersonRenderComponent.h">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="NetworkComponent.h">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="HealthNote.h">
-      <Filter>Notes</Filter>
-    </ClInclude>
     <ClInclude Include="CollisionNote.h">
       <Filter>Notes</Filter>
     </ClInclude>
     <ClInclude Include="PhysicsComponent.h">
       <Filter>Component</Filter>
     </ClInclude>
-    <ClInclude Include="UpgradeComponent.h">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="UpgradeComponentData.h">
-      <Filter>EntityFactory\EntityData\ComponentData</Filter>
-    </ClInclude>
-    <ClInclude Include="UpgradeNote.h">
-      <Filter>Notes</Filter>
-    </ClInclude>
-    <ClInclude Include="AIComponent.h">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="GrenadeComponent.h">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="GrenadeComponentData.h">
-      <Filter>EntityFactory\EntityData\ComponentData</Filter>
-    </ClInclude>
-    <ClInclude Include="AIComponentData.h">
-      <Filter>EntityFactory\EntityData\ComponentData</Filter>
-    </ClInclude>
-    <ClInclude Include="ArriveBehavior.h">
-      <Filter>Behavior</Filter>
-    </ClInclude>
-    <ClInclude Include="Behavior.h">
-      <Filter>Behavior</Filter>
-    </ClInclude>
-    <ClInclude Include="BlendedBehavior.h">
-      <Filter>Behavior</Filter>
-    </ClInclude>
-    <ClInclude Include="EvadeBehavior.h">
-      <Filter>Behavior</Filter>
-    </ClInclude>
-    <ClInclude Include="BulletComponent.h">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="BulletComponentData.h">
-      <Filter>EntityFactory\EntityData\ComponentData</Filter>
-    </ClInclude>
-    <ClInclude Include="SpawnpointComponent.h">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="SpawnpointComponentData.h">
-      <Filter>EntityFactory\EntityData\ComponentData</Filter>
-    </ClInclude>
-    <ClInclude Include="SharedUnitManager.h" />
     <ClInclude Include="SoundComponentData.h">
       <Filter>EntityFactory\EntityData\ComponentData</Filter>
     </ClInclude>
     <ClInclude Include="SoundComponent.h">
       <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="RotationComponent.h">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="RotationComponentData.h">
-      <Filter>EntityFactory\EntityData\ComponentData</Filter>
-    </ClInclude>
-    <ClInclude Include="VisualExplosionComponent.h">
-      <Filter>Component</Filter>
-    </ClInclude>
-    <ClInclude Include="VisualExplosionComponentData.h">
-      <Filter>EntityFactory\EntityData\ComponentData</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

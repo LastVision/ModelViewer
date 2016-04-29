@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Component.h"
-
 #include <Subscriber.h>
 
 class SoundComponent : public Component, public Subscriber
@@ -16,8 +15,6 @@ public:
 	static eComponentType GetTypeStatic();
 	eComponentType GetType() override;
 
-	void ReceiveMessage(const LevelLoadedMessage& aMessage) override;
-	void ReceiveMessage(const LevelCompleteMessage& aMessage) override;
 private:
 	int myAudioSFXID;
 };

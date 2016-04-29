@@ -1,23 +1,15 @@
 #include "stdafx.h"
 #include <AudioInterface.h>
 #include <Camera.h>
-#include "ClientNetworkManager.h"
-#include "CreditMenuState.h"
 #include <Cursor.h>
-#include <FadeMessage.h>
 #include <GUIManager.h>
-#include "HelpState.h"
 #include "InGameState.h"
 #include <InputWrapper.h>
 #include "MainMenuState.h"
 #include <ModelLoader.h>
-#include <NetMessageKillServer.h>
 #include <OnClickMessage.h>
-#include "OptionsState.h"
 #include <PostMaster.h>
 #include <PollingStation.h>
-#include "ServerSelectState.h"
-#include "SplashState.h"
 #include "StateStackProxy.h"
 #include <SpriteProxy.h>
 
@@ -83,25 +75,17 @@ void MainMenuState::InitState(StateStackProxy* aStateStackProxy, GUI::Cursor* aC
 	OnResize(windowSize.x, windowSize.y);
 	myHasRunOnce = false;
 
-	PostMaster::GetInstance()->SendMessage(FadeMessage(1.f / 3.f));
 }
 
 void MainMenuState::EndState()
 {
-	PostMaster::GetInstance()->SendMessage(FadeMessage(1.f / 3.f));
+
 }
 
 const eStateStatus MainMenuState::Update(const float& aDeltaTime)
 {
 	if (myHasRunOnce == false)
 	{
-//#ifdef RELEASE_BUILD
-		PostMaster::GetInstance()->UnSubscribe(eMessageType::ON_CLICK, this);
-		SET_RUNTIME(false); 
-		myStateStack->PushSubGameState(new SplashState("Data/Resource/Texture/Menu/Splash/T_logo_our.dds", false));
-		SET_RUNTIME(false);
-		myStateStack->PushSubGameState(new SplashState("Data/Resource/Texture/Menu/Splash/T_logo_other.dds", true));
-//#endif
 		myHasRunOnce = true;
 	}
 	else 
@@ -155,7 +139,6 @@ void MainMenuState::ResumeState()
 	PostMaster::GetInstance()->Subscribe(eMessageType::ON_CLICK, this);
 	myCursor->SetShouldRender(true);
 	Prism::Audio::AudioInterface::GetInstance()->PostEvent("Play_MainMenu", 0);
-	PostMaster::GetInstance()->SendMessage(FadeMessage(1.f / 3.f));
 }
 
 void MainMenuState::OnResize(int aWidth, int aHeight)
@@ -165,48 +148,5 @@ void MainMenuState::OnResize(int aWidth, int aHeight)
 
 void MainMenuState::ReceiveMessage(const OnClickMessage& aMessage)
 {
-	if (myIsActiveState == true)
-	{
-		switch (aMessage.myEvent)
-		{
-		case eOnClickEvent::START_SINGLEPLAYER:
-			PostMaster::GetInstance()->UnSubscribe(eMessageType::ON_CLICK, this);
-			SET_RUNTIME(false);
-			myStateStack->PushMainGameState(new ServerSelectState(ServerSelectState::eType::SINGLEPLAYER));
-			break;
-		case eOnClickEvent::MULTIPLAYER_HOST:
-			PostMaster::GetInstance()->UnSubscribe(eMessageType::ON_CLICK, this);
-			SET_RUNTIME(false);
-			myStateStack->PushMainGameState(new ServerSelectState(ServerSelectState::eType::MULTIPLAYER_HOST));
-			break;
-		case eOnClickEvent::MULTIPLAYER_JOIN:
-			PostMaster::GetInstance()->UnSubscribe(eMessageType::ON_CLICK, this);
-			SET_RUNTIME(false);
-			myStateStack->PushMainGameState(new ServerSelectState(ServerSelectState::eType::MULTIPLAYER_JOIN));
-			break;
-		case eOnClickEvent::HELP:
-			PostMaster::GetInstance()->UnSubscribe(eMessageType::ON_CLICK, this);
-			SET_RUNTIME(false);
-			myStateStack->PushSubGameState(new HelpState());
-			break;
-		case eOnClickEvent::CREDITS:
-			PostMaster::GetInstance()->UnSubscribe(eMessageType::ON_CLICK, this);
-			SET_RUNTIME(false);
-			myStateStack->PushMainGameState(new CreditMenuState());
-			break;
-		case eOnClickEvent::OPTIONS:
-			PostMaster::GetInstance()->UnSubscribe(eMessageType::ON_CLICK, this);
-			SET_RUNTIME(false);
-			myStateStack->PushSubGameState(new OptionsState());
-			break;
-		case eOnClickEvent::GAME_QUIT:
-			ClientNetworkManager::GetInstance()->AddMessage(NetMessageKillServer(), ClientNetworkManager::GetInstance()->GetLocalServerAddress());
-			myStateStatus = eStateStatus::ePopMainState;
-			break;
-		
-		default:
-			DL_ASSERT("Unknown event type.");
-			break;
-		}
-	}
+	
 }

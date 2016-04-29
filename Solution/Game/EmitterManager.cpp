@@ -22,12 +22,12 @@ EmitterManager::EmitterManager()
 	PostMaster* postMaster = PostMaster::GetInstance();
 	postMaster->Subscribe(eMessageType::PARTICLE, this);
 	Prism::ModelLoader::GetInstance()->Pause();
-	ReadListOfLists("Data/Resource/Particle/LI_emitter_lists.xml");
+	//ReadListOfLists("Data/Resource/Particle/LI_emitter_lists.xml");
 
-	for (auto it = myEmitters.begin(); it != myEmitters.end(); ++it)
-	{
-		myEmitterList.Add(it->second);
-	}
+	//for (auto it = myEmitters.begin(); it != myEmitters.end(); ++it)
+	//{
+	//	myEmitterList.Add(it->second);
+	//}
 	Prism::ModelLoader::GetInstance()->UnPause();
 	short meter = 60;
 	myCullDistance = meter * meter;

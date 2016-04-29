@@ -250,7 +250,7 @@ namespace Prism
 	void DeferredRenderer::SetCubeMap(const std::string& aFilePath)
 	{
 		ModelLoader::GetInstance()->Pause();
-		myCubemap = TextureContainer::GetInstance()->GetTexture("LightData/" + aFilePath + "_cubemap.dds");
+		//myCubemap = TextureContainer::GetInstance()->GetTexture("LightData/" + aFilePath + "_cubemap.dds");
 		ModelLoader::GetInstance()->UnPause();
 	}
 

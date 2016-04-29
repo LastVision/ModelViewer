@@ -1,7 +1,6 @@
 #pragma once
 #include "Component.h"
 #include <Matrix.h>
-#include <NetworkSubscriber.h>
 #include <StaticArray.h>
 
 namespace Prism
@@ -15,7 +14,7 @@ class Component;
 
 struct EntityData;
 
-class Entity : public NetworkSubscriber
+class Entity
 {
 	friend class AnimationComponent;
 	friend class GraphicsComponent;
@@ -64,7 +63,6 @@ public:
 	bool IsInScene() const;
 	const std::string& GetSubType() const;
 
-	void ReceiveNetworkMessage(const NetMessageOnDeath& aMessage, const sockaddr_in& aSenderAddress) override;
 	bool GetIsEnemy();
 	void SetIsEnemy(bool aIsEnemy);
 

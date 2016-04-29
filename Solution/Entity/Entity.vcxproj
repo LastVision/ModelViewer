@@ -162,92 +162,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AIComponent.h" />
-    <ClInclude Include="AIComponentData.h" />
     <ClInclude Include="AnimationComponent.h" />
     <ClInclude Include="AnimationComponentData.h" />
-    <ClInclude Include="ArriveBehavior.h" />
-    <ClInclude Include="Behavior.h" />
-    <ClInclude Include="BehaviorNote.h" />
-    <ClInclude Include="BlendedBehavior.h" />
     <ClInclude Include="CollisionNote.h" />
     <ClInclude Include="EntityEnumConverter.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="ComponentLoader.h" />
-    <ClInclude Include="DamageNote.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityData.h" />
     <ClInclude Include="EntityFactory.h" />
-    <ClInclude Include="EvadeBehavior.h" />
-    <ClInclude Include="FirstPersonRenderComponent.h" />
-    <ClInclude Include="FirstPersonRenderComponentData.h" />
     <ClInclude Include="GraphicsComponent.h" />
     <ClInclude Include="GraphicsComponentData.h" />
-    <ClInclude Include="GrenadeLauncher.h" />
-    <ClInclude Include="HealthComponent.h" />
-    <ClInclude Include="HealthComponentData.h" />
-    <ClInclude Include="HealthNote.h" />
-    <ClInclude Include="InputComponent.h" />
-    <ClInclude Include="InputComponentData.h" />
-    <ClInclude Include="NetworkComponent.h" />
-    <ClInclude Include="NetworkComponentData.h" />
     <ClInclude Include="PhysicsComponent.h" />
-    <ClInclude Include="Pistol.h" />
     <ClInclude Include="PollingStation.h" />
-    <ClInclude Include="GrenadeComponent.h" />
-    <ClInclude Include="GrenadeComponentData.h" />
-    <ClInclude Include="BulletComponent.h" />
-    <ClInclude Include="BulletComponentData.h" />
-    <ClInclude Include="RotationComponent.h" />
-    <ClInclude Include="RotationComponentData.h" />
-    <ClInclude Include="SharedUnitManager.h" />
-    <ClInclude Include="ShootingComponent.h" />
-    <ClInclude Include="ShootingComponentData.h" />
-    <ClInclude Include="ShootNote.h" />
-    <ClInclude Include="Shotgun.h" />
     <ClInclude Include="SoundComponent.h" />
     <ClInclude Include="SoundComponentData.h" />
-    <ClInclude Include="SpawnpointComponent.h" />
-    <ClInclude Include="SpawnpointComponentData.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TriggerComponent.h" />
     <ClInclude Include="TriggerComponentData.h" />
-    <ClInclude Include="UpgradeComponent.h" />
-    <ClInclude Include="UpgradeComponentData.h" />
-    <ClInclude Include="UpgradeNote.h" />
-    <ClInclude Include="VisualExplosionComponent.h" />
-    <ClInclude Include="VisualExplosionComponentData.h" />
-    <ClInclude Include="Weapon.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AIComponent.cpp" />
     <ClCompile Include="AnimationComponent.cpp" />
-    <ClCompile Include="ArriveBehavior.cpp" />
-    <ClCompile Include="Behavior.cpp" />
-    <ClCompile Include="BlendedBehavior.cpp" />
     <ClCompile Include="EntityEnumConverter.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ComponentLoader.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityFactory.cpp" />
-    <ClCompile Include="EvadeBehavior.cpp" />
-    <ClCompile Include="FirstPersonRenderComponent.cpp" />
     <ClCompile Include="GraphicsComponent.cpp" />
-    <ClCompile Include="GrenadeLauncher.cpp" />
-    <ClCompile Include="HealthComponent.cpp" />
-    <ClCompile Include="InputComponent.cpp" />
-    <ClCompile Include="NetworkComponent.cpp" />
     <ClCompile Include="PhysicsComponent.cpp" />
-    <ClCompile Include="Pistol.cpp" />
     <ClCompile Include="PollingStation.cpp" />
-    <ClCompile Include="GrenadeComponent.cpp" />
-    <ClCompile Include="BulletComponent.cpp" />
-    <ClCompile Include="RotationComponent.cpp" />
-    <ClCompile Include="SharedUnitManager.cpp" />
-    <ClCompile Include="ShootingComponent.cpp" />
-    <ClCompile Include="Shotgun.cpp" />
     <ClCompile Include="SoundComponent.cpp" />
-    <ClCompile Include="SpawnpointComponent.cpp" />
     <ClCompile Include="stdafx.cpp">
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</MultiProcessorCompilation>
       <MultiProcessorCompilation Condition="'$(Configuration)|$(Platform)'=='DataExporter|Win32'">false</MultiProcessorCompilation>
@@ -259,9 +203,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Internal|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TriggerComponent.cpp" />
-    <ClCompile Include="UpgradeComponent.cpp" />
-    <ClCompile Include="VisualExplosionComponent.cpp" />
-    <ClCompile Include="Weapon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Audio\Audio.vcxproj">

@@ -1,29 +1,15 @@
 #include "stdafx.h"
 
-#include "AIComponent.h"
 #include "AnimationComponent.h"
-#include "FirstPersonRenderComponent.h"
 #include "GraphicsComponent.h"
-#include "HealthComponent.h"
-#include "InputComponent.h"
-#include <NetMessageOnDeath.h>
-#include "NetworkComponent.h"
 #include "PhysicsComponent.h"
 #include "PollingStation.h"
-#include "GrenadeComponent.h"
 #include <Scene.h>
 #include <Instance.h>
 #include <EmitterMessage.h>
 #include <PostMaster.h>
-#include <SharedNetworkManager.h>
-#include "ShootingComponent.h"
-#include "SpawnpointComponent.h"
 #include "TriggerComponent.h"
-#include "UpgradeComponent.h"
-#include "BulletComponent.h"
 #include "SoundComponent.h"
-#include "RotationComponent.h"
-#include "VisualExplosionComponent.h"
 
 Entity::Entity(unsigned int aGID, const EntityData& aEntityData, Prism::Scene* aScene, bool aClientSide, const CU::Vector3<float>& aStartPosition,
 	const CU::Vector3f& aRotation, const CU::Vector3f& aScale, const std::string& aSubType)
@@ -77,49 +63,6 @@ Entity::Entity(unsigned int aGID, const EntityData& aEntityData, Prism::Scene* a
 		}
 	}
 
-
-	if (aEntityData.myAIComponentData.myExistsInEntity == true)
-	{
-		myComponents[static_cast<int>(eComponentType::AI)] = new AIComponent(*this, aEntityData.myAIComponentData, myOrientation, aEntityData.myProjecileData);
-	}
-
-	if (aEntityData.myGrenadeData.myExistsInEntity == true)
-	{
-		myComponents[static_cast<int>(eComponentType::GRENADE)] = new GrenadeComponent(*this, aEntityData.myGrenadeData, aScene);
-	}
-
-	if (aEntityData.myNetworkData.myExistsInEntity == true)
-	{
-		myComponents[static_cast<int>(eComponentType::NETWORK)] = new NetworkComponent(*this, myOrientation);
-	}
-
-	if (aEntityData.myHealthData.myExistsInEntity == true)
-	{
-		myComponents[static_cast<int>(eComponentType::HEALTH)] = new HealthComponent(*this, aEntityData.myHealthData);
-	}
-
-	if (aEntityData.myUpgradeData.myExistsInEntity == true)
-	{
-		myComponents[static_cast<int>(eComponentType::UPGRADE)] = new UpgradeComponent(*this, aEntityData.myUpgradeData);
-	}
-
-	if (aEntityData.myShootingData.myExistsInEntity == true)
-	{
-		myComponents[static_cast<int>(eComponentType::SHOOTING)] = new ShootingComponent(*this, aScene);
-	}
-
-	
-
-	if (aEntityData.myProjecileData.myExistsInEntity == true)
-	{
-		myComponents[static_cast<int>(eComponentType::BULLET)] = new BulletComponent(*this, myOrientation);
-	}
-	if (aEntityData.mySpawnpointData.myExistsInEntity == true)
-	{
-		myComponents[static_cast<int>(eComponentType::SPAWNPOINT)] = new SpawnpointComponent(*this, aEntityData.mySpawnpointData);
-		myOrientation.SetPos(myOrientation.GetPos() + CU::Vector3<float>(0.f, 1.1f, 0.f));
-	}
-
 	if (aEntityData.mySoundData.myExistsInEntity == true && myIsClientSide == true)
 	{
 		myComponents[static_cast<int>(eComponentType::SOUND)] = new SoundComponent(*this);
@@ -151,39 +94,12 @@ Entity::Entity(unsigned int aGID, const EntityData& aEntityData, Prism::Scene* a
 				, "no path");
 		}
 	}
-	if (aEntityData.myInputData.myExistsInEntity == true && myIsClientSide == true)
-	{
-		myComponents[static_cast<int>(eComponentType::INPUT)] = new InputComponent(*this, aEntityData.myInputData);
-	}
-	if (aEntityData.myFirstPersonRenderData.myExistsInEntity == true && myIsClientSide == true)
-	{
-		myComponents[static_cast<int>(eComponentType::FIRST_PERSON_RENDER)] = new FirstPersonRenderComponent(*this, aScene);
-		if (aEntityData.myShootingData.myExistsInEntity == true)
-		{
-			GetComponent<ShootingComponent>()->Init(aScene);
-		}
-	}
-	if (aEntityData.myRotationData.myExistsInEntity == true && myIsClientSide == true)
-	{
-		myComponents[static_cast<int>(eComponentType::ROTATION)] = new RotationComponent(*this, aEntityData.myRotationData);
-	}
-	if (aEntityData.myVisualExplosionData.myExistsInEntity == true && myIsClientSide == true)
-	{
-		myComponents[static_cast<int>(eComponentType::VISUAL_EXPLOSION)] = new VisualExplosionComponent(*this, aEntityData.myVisualExplosionData, myOrientation);
-	}
-
 	Reset();
-	SharedNetworkManager::GetInstance()->Subscribe(eNetMessageType::ON_DEATH, this);
 
 };
 
 Entity::~Entity()
 {
-	SharedNetworkManager::GetInstance()->UnSubscribe(eNetMessageType::ON_DEATH, this);
-	//if (myIsInScene == true)
-	//{
-	//	RemoveFromScene();		
-	//}
 	if (GetComponent<PhysicsComponent>() != nullptr)
 	{
 		SET_RUNTIME(false);
@@ -200,10 +116,6 @@ void Entity::Reset()
 {
 	myAlive = true;
 	myState = eEntityState::IDLE;
-	if (myIsClientSide == false && mySubType == "playerserver")
-	{
-		PollingStation::GetInstance()->AddEntity(this);
-	}
 
 	for (int i = 0; i < static_cast<int>(eComponentType::_COUNT); ++i)
 	{
@@ -343,16 +255,7 @@ void Entity::Kill(bool aRemoveFromPhysics)
 		RemoveFromScene();
 		myIsInScene = false;
 	}
-
-	if (myIsClientSide == false)
-	{
-		SharedNetworkManager::GetInstance()->AddMessage(NetMessageOnDeath(myGID));
-		if (mySubType == "player")
-		{
-			PollingStation::GetInstance()->RemovePlayer(this);
-		}
-	}
-
+	
 	if (aRemoveFromPhysics == true && myEntityData.myPhysicsData.myExistsInEntity == true)
 	{
 		GetComponent<PhysicsComponent>()->RemoveFromScene();
@@ -362,12 +265,4 @@ void Entity::Kill(bool aRemoveFromPhysics)
 bool Entity::GetIsClient()
 {
 	return myIsClientSide;
-}
-
-void Entity::ReceiveNetworkMessage(const NetMessageOnDeath& aMessage, const sockaddr_in&)
-{
-	if (aMessage.myGID == myGID)
-	{
-		Kill();
-	}
 }

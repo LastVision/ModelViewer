@@ -1,5 +1,4 @@
 #pragma once
-#include <SharedGame.h>
 #include "StateStack.h"
 #include <Subscriber.h>
 
@@ -13,7 +12,13 @@ namespace Prism
 	class Camera;
 }
 
-class ClientGame : public Subscriber, public SharedGame
+namespace CU
+{
+	class TimerManager;
+}
+
+
+class ClientGame : public Subscriber
 {
 public:
 	ClientGame();
@@ -21,13 +26,11 @@ public:
 
 	bool Init(HWND& aHwnd);
 	bool Destroy();
-	bool Update() override;
+	bool Update();
 
 	void Pause();
 	void UnPause();
 	void OnResize(int aWidth, int aHeight);
-
-	void ReceiveMessage(const FadeMessage& aMessage) override;
 
 private:
 	void operator=(ClientGame& aApp) = delete;
@@ -37,7 +40,7 @@ private:
 	HWND* myWindowHandler;
 
 	StateStack myStateStack;
-
+	CU::TimerManager* myTimerManager;
 	bool myLockMouse;
 	bool myShowSystemInfo;
 	bool myIsComplete;

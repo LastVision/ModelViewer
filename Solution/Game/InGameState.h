@@ -3,7 +3,6 @@
 #include <Matrix.h>
 #include <GrowingArray.h>
 #include <Subscriber.h>
-#include <NetworkSubscriber.h>
 
 class ClientLevel;
 class ClientLevelFactory;
@@ -28,10 +27,10 @@ namespace GUI
 	class Cursor;
 }
 
-class InGameState : public GameState, public Subscriber, public NetworkSubscriber
+class InGameState : public GameState, public Subscriber
 {
 public:
-	InGameState(int aLevelID, unsigned int aServerHashLevelValue);
+	InGameState(int aLevelID);
 	~InGameState();
 
 	void InitState(StateStackProxy* aStateStackProxy, GUI::Cursor* aCursor) override;
@@ -42,10 +41,6 @@ public:
 	void ResumeState() override;
 
 	void ReceiveMessage(const GameStateMessage& aMessage) override;
-
-	void ReceiveNetworkMessage(const NetMessageAllClientsComplete& aMessage, const sockaddr_in& aSenderAddress) override;
-	void ReceiveNetworkMessage(const NetMessageLevelComplete& aMessage, const sockaddr_in& aSenderAddress) override;
-	void ReceiveNetworkMessage(const NetMessageLoadLevel& aMessage, const sockaddr_in& aSenderAddress) override;
 
 	void OnResize(int aWidth, int aHeight) override;
 
@@ -58,19 +53,7 @@ private:
 
 	eInGameState myState;
 
-	//bool myShouldLoadLevel;
-	//bool myShouldShowLoadingScreen;
-
-	//bool myLevelComplete;
-	//bool myFailedLevel;
-	//bool myCanStartNextLevel;
-	//bool myLoadingScreen;
-	//bool myLoadingScreenCanStart;
-	//bool myPhysicsDone;
 	bool myFailedLevelHash;
-
-	unsigned int myServerHashLevelValue;
-	unsigned int myHashLevelValue;
 
 	Prism::TextProxy* myText;
 

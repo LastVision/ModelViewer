@@ -3,27 +3,10 @@
 #include <CommonHelper.h>
 #include "ComponentLoader.h"
 #include "EntityEnumConverter.h"
-#include "HealthComponentData.h"
-#include "NetworkComponentData.h"
 #include "PhysicsComponentData.h"
-#include "BulletComponentData.h"
-#include "ShootingComponentData.h"
 #include "TriggerComponentData.h"
-#include "UpgradeComponentData.h"
-#include "RotationComponentData.h"
-#include "VisualExplosionComponentData.h"
 #include "XMLReader.h"
 #include "GameEnum.h"
-
-void ComponentLoader::LoadAIComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, AIComponentData& aOutputData)
-{
-	aOutputData.myExistsInEntity = true;
-
-	aDocument.ForceReadAttribute(aDocument.ForceFindFirstChild(aSourceElement, "VisionRange"), "value", aOutputData.myVisionRange);
-	aDocument.ForceReadAttribute(aDocument.ForceFindFirstChild(aSourceElement, "ArriveStopRange"), "value", aOutputData.myArriveStopRange);
-	aDocument.ForceReadAttribute(aDocument.ForceFindFirstChild(aSourceElement, "Speed"), "value", aOutputData.mySpeed);
-	aDocument.ForceReadAttribute(aDocument.ForceFindFirstChild(aSourceElement, "AttackAnimationTime"), "value", aOutputData.myAttackAnimationTime);
-}
 
 void ComponentLoader::LoadAnimationComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, AnimationComponentData& aOutputData)
 {
@@ -80,27 +63,6 @@ void ComponentLoader::LoadGraphicsComponent(XMLReader& aDocument, tinyxml2::XMLE
 		}
 #endif
 	}
-}
-
-void ComponentLoader::LoadHealthComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, HealthComponentData& aOutputData)
-{
-	aOutputData.myExistsInEntity = true;
-
-	for (tinyxml2::XMLElement* e = aDocument.FindFirstChild(aSourceElement); e != nullptr; e = aDocument.FindNextElement(e))
-	{
-		std::string elementName = CU::ToLower(e->Name());
-		if (elementName == CU::ToLower("MaxHealth"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.myMaxHealth);
-		}
-	}
-}
-
-void ComponentLoader::LoadNetworkComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, NetworkComponentData& aOutputData)
-{
-	aDocument;
-	aSourceElement;
-	aOutputData.myExistsInEntity = true;
 }
 
 void ComponentLoader::LoadPhysicsComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, PhysicsComponentData& aOutputData)
@@ -161,16 +123,6 @@ void ComponentLoader::LoadPhysicsComponent(XMLReader& aDocument, tinyxml2::XMLEl
 	}
 }
 
-void ComponentLoader::LoadGrenadeComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, GrenadeComponentData& aOutputData)
-{
- 	aOutputData.myExistsInEntity = true;
-
-	
-	//aDocument.ForceReadAttribute(aSourceElement, "value", aOutputData.myTimeToExplode);
-	aDocument.ForceReadAttribute(aDocument.ForceFindFirstChild(aSourceElement, "timeToExplode"), "value", aOutputData.myTimeToExplode);
-	
-}
-
 void ComponentLoader::LoadTriggerComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, TriggerComponentData& aOutputData)
 {
 	aOutputData.myExistsInEntity = true;
@@ -209,162 +161,8 @@ void ComponentLoader::LoadTriggerComponent(XMLReader& aDocument, tinyxml2::XMLEl
 	}
 }
 
-void ComponentLoader::LoadInputComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, InputComponentData& aOutputData)
-{
-	for (tinyxml2::XMLElement* e = aDocument.FindFirstChild(aSourceElement); e != nullptr; e = aDocument.FindNextElement(e))
-	{
-		std::string elementName = CU::ToLower(e->Name());
-		if (elementName == CU::ToLower("Speed"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.mySpeed);
-		}
-		else if (elementName == CU::ToLower("rotationSpeed"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.myRotationSpeed);
-		}
-		else if (elementName == CU::ToLower("sprintMultiplier"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.mySprintMultiplier);
-		}
-		else if (elementName == CU::ToLower("maxSprintEnergy"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.myMaxSprintEnergy);
-		}
-		else if (elementName == CU::ToLower("sprintIncreasePerSecond"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.mySprintIncrease);
-		}
-		else if (elementName == CU::ToLower("sprintDecreasePerSecond"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.mySprintDecrease);
-		}
-		else if (elementName == CU::ToLower("directionMultiplier"))
-		{
-			aDocument.ForceReadAttribute(e, "forward", aOutputData.myForwardMultiplier);
-			aDocument.ForceReadAttribute(e, "backward", aOutputData.myBackwardMultiplier);
-			aDocument.ForceReadAttribute(e, "sideways", aOutputData.mySidewaysMultiplier);
-		}
-	}
-
-	aOutputData.myExistsInEntity = true;
-}
-
-void ComponentLoader::LoadShootingComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, ShootingComponentData& aOutputData)
-{
-	aDocument;
-	aSourceElement;
-
-	aOutputData.myExistsInEntity = true;
-}
-
-void ComponentLoader::LoadSpawnpointComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, SpawnpointComponentData& aOutputData)
-{
-	aOutputData.myExistsInEntity = true;
-	aOutputData.myUnitTypes.Init(8);
-	aDocument;
-	aSourceElement;
-	for (tinyxml2::XMLElement* e = aDocument.FindFirstChild(aSourceElement); e != nullptr; e = aDocument.FindNextElement(e))
-	{
-		std::string elementName = CU::ToLower(e->Name());
-		if (elementName == CU::ToLower("SpawnUnitType"))
-		{
-			std::string toAdd;
-			aDocument.ForceReadAttribute(e, "type", toAdd);
-			aOutputData.myUnitTypes.Add(toAdd);
-		}
-		else if (elementName == CU::ToLower("SpawnpointLifetime"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.mySpawnpointLifetime);
-		}
-		else if (elementName == CU::ToLower("SpawnInterval"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.mySpawnInterval);
-		}
-		else if (elementName == CU::ToLower("SpawnPerInterval"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.mySpawnPerInterval);
-		}
-		else if (elementName == CU::ToLower("SpawnCount"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.myUnitCount);
-		}
-	}
-}
-
-void ComponentLoader::LoadUpgradeComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, UpgradeComponentData& aOutputData)
-{
-	for (tinyxml2::XMLElement* e = aDocument.FindFirstChild(aSourceElement); e != nullptr; e = aDocument.FindNextElement(e))
-	{
-		std::string elementName = CU::ToLower(e->Name());
-		if (elementName == CU::ToLower("Weapon"))
-		{
-			std::string type = "";
-			aDocument.ForceReadAttribute(e, "type", type);
-			aOutputData.myWeaponType = EntityEnumConverter::ConvertStringToWeaponType(type);
-		}
-		else if (elementName == CU::ToLower("ClipSizeModifier"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.myClipSizeModifier);
-		}
-		else if (elementName == CU::ToLower("AmmoTotalModifier"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.myAmmoTotalModifier);
-		}
-		else if (elementName == CU::ToLower("DamageModifier"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.myDamageModifier);
-		}
-		else if (elementName == CU::ToLower("ShootTimeModifier"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.myShootTimeModifier);
-		}
-		else if (elementName == CU::ToLower("MinSpreadRotation"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.myMinSpreadRotation);
-		}
-		else if (elementName == CU::ToLower("MaxSpreadRotation"))
-		{
-			aDocument.ForceReadAttribute(e, "value", aOutputData.myMaxSpreadRotation);
-		}
-	}
-
-	aOutputData.myExistsInEntity = true;
-}
-
-void ComponentLoader::LoadBulletComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, BulletComponentData& aOutputData)
-{
-	aOutputData.myExistsInEntity = true;
-
-	aDocument.ForceReadAttribute(aDocument.ForceFindFirstChild(aSourceElement, "Damage"), "value", aOutputData.myDamage);
-	aOutputData.myDamage = int(ceilf(GC::DamageMultiplier[GC::Difficulty] * aOutputData.myDamage));
-
-	aDocument.ForceReadAttribute(aDocument.ForceFindFirstChild(aSourceElement, "Speed"), "value", aOutputData.mySpeed);
-	aDocument.ForceReadAttribute(aDocument.ForceFindFirstChild(aSourceElement, "Lifetime"), "value", aOutputData.myLifetime);
-	aDocument.ForceReadAttribute(aDocument.ForceFindFirstChild(aSourceElement, "minspreadrotation"), "value", aOutputData.myMinRotation);
-	aDocument.ForceReadAttribute(aDocument.ForceFindFirstChild(aSourceElement, "maxspreadrotation"), "value", aOutputData.myMaxRotation);
-}
-
 void ComponentLoader::LoadSoundComponent(XMLReader&, tinyxml2::XMLElement*, SoundComponentData& aOutputData)
 {
-	aOutputData.myExistsInEntity = true;
-}
-
-void ComponentLoader::LoadRotationComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, RotationComponentData& aOutputData)
-{
-	aOutputData.myExistsInEntity = true;
-	aDocument.ForceReadAttribute(aDocument.ForceFindFirstChild(aSourceElement, "Speed"), "value", aOutputData.myRotationSpeed);
-}
-
-void ComponentLoader::LoadVisualExplosionComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, VisualExplosionComponentData& aOutputData)
-{
-	aOutputData.myExistsInEntity = true;
-}
-
-void ComponentLoader::LoadFirstPersonRenderComponent(XMLReader& aDocument, tinyxml2::XMLElement* aSourceElement, FirstPersonRenderComponentData& aOutputData)
-{
-	aDocument;
-	aSourceElement;
-
 	aOutputData.myExistsInEntity = true;
 }
 

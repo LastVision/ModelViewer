@@ -1,6 +1,5 @@
 #include "stdafx.h"
 
-#include "ClientNetworkManager.h"
 #include "StateStack.h"
 #include <DL_Assert.h>
 #include "GameState.h"
@@ -101,12 +100,6 @@ bool StateStack::UpdateCurrentState(const float& aDeltaTime)
 	case eStateStatus::eKeepState:
 		break;
 	}
-
-	ClientNetworkManager::GetInstance()->Update(aDeltaTime);
-	ClientNetworkManager::GetInstance()->MainIsDone();
-	ClientNetworkManager::GetInstance()->SendMainIsDone();
-	ClientNetworkManager::GetInstance()->WaitForReceieve();
-	ClientNetworkManager::GetInstance()->WaitForSend();
 
 	return myGameStates.Size() > 0;
 }
