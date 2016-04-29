@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include <ClientGame.h>
+#include <Game.h>
 #include <ModelLoader.h>
 #include <SetupInfo.h>
 #include <string.h>

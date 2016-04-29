@@ -11,7 +11,7 @@
 #include <Engine.h>
 #include <EntityFactory.h>
 #include <FileWatcher.h>
-#include "ClientGame.h"
+#include "Game.h"
 #include <InputWrapper.h>
 #include "MainMenuState.h"
 #include <ModelLoader.h>
@@ -117,19 +117,24 @@ bool ClientGame::Update()
 		deltaTime = 1.0f / 10.0f;
 	}
 
-	if (myLockMouse == true)
+	//if (myLockMouse == true)
+	//{
+	//	//SetCursorPos(Prism::Engine::GetInstance()->GetWindowSize().x / 2, Prism::Engine::GetInstance()->GetWindowSize().y / 2);
+	//	RECT windowRect;
+	//	GetWindowRect(*myWindowHandler, &windowRect);
+	//	if (Prism::Engine::GetInstance()->IsFullscreen() == false)
+	//	{
+	//		windowRect.left += 10;
+	//		windowRect.top += 35;
+	//		windowRect.right -= 10;
+	//		windowRect.bottom -= 10;
+	//	}
+	//	ClipCursor(&windowRect);
+	//}
+
+	if (CU::InputWrapper::GetInstance()->KeyDown(DIK_ESCAPE))
 	{
-		//SetCursorPos(Prism::Engine::GetInstance()->GetWindowSize().x / 2, Prism::Engine::GetInstance()->GetWindowSize().y / 2);
-		RECT windowRect;
-		GetWindowRect(*myWindowHandler, &windowRect);
-		if (Prism::Engine::GetInstance()->IsFullscreen() == false)
-		{
-			windowRect.left += 10;
-			windowRect.top += 35;
-			windowRect.right -= 10;
-			windowRect.bottom -= 10;
-		}
-		ClipCursor(&windowRect);
+		return false;
 	}
 
 	if (myStateStack.UpdateCurrentState(deltaTime) == false)

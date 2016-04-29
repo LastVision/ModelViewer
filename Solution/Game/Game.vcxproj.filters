@@ -23,7 +23,6 @@
     <ClCompile Include="EmitterManager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
-    <ClCompile Include="ClientGame.cpp" />
     <ClCompile Include="StateStack.cpp">
       <Filter>StateStack</Filter>
     </ClCompile>
@@ -39,6 +38,7 @@
     <ClCompile Include="LevelFactory.cpp">
       <Filter>Level\Factory</Filter>
     </ClCompile>
+    <ClCompile Include="Game.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -69,7 +69,6 @@
     <ClInclude Include="EmitterManager.h">
       <Filter>Managers</Filter>
     </ClInclude>
-    <ClInclude Include="ClientGame.h" />
     <ClInclude Include="StateStack.h">
       <Filter>StateStack</Filter>
     </ClInclude>
@@ -85,6 +84,7 @@
     <ClInclude Include="LevelFactory.h">
       <Filter>Level\Factory</Filter>
     </ClInclude>
+    <ClInclude Include="Game.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="PreCompile">
