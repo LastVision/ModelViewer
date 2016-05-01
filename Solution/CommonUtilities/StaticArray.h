@@ -1,6 +1,5 @@
 #pragma once
 #include <cassert>
-#include "DL_Debug.h"
 #define SA_TEMPLATE template<typename Type, int Size>
 #define SA_TYPE StaticArray<Type, Size>
 
@@ -24,13 +23,6 @@ namespace CU
 		// Utility functions
 		inline void Insert(int aIndex, Type& aObject);
 		inline void DeleteAll();
-
-		typedef Type* iterator;
-		typedef const Type* const_iterator;
-		iterator begin() { return &myData[0]; }
-		const_iterator begin() const { return &myData[0]; }
-		iterator end() { return &myData[Size]; }
-		const_iterator end() const { return &myData[Size]; }
 	private:
 		Type myData[Size];
 	};
@@ -69,24 +61,24 @@ namespace CU
 	SA_TEMPLATE
 	inline const Type& SA_TYPE::operator[](const int& aIndex) const
 	{
-		DL_ASSERT_EXP(aIndex >= 0, "Index has to be 0 or more.");
-		DL_ASSERT_EXP(aIndex < Size, "a index out of bounds!");
+		assert(aIndex >= 0 && "Index has to be 0 or more.");
+		assert(aIndex < Size && "a index out of bounds!");
 		return myData[aIndex];
 	}
 
 	SA_TEMPLATE
 	inline Type& SA_TYPE::operator[](const int& aIndex)
 	{
-		DL_ASSERT_EXP(aIndex >= 0, "Index has to be 0 or more.");
-		DL_ASSERT_EXP(aIndex < Size, "a index out of bounds!");
+		assert(aIndex >= 0 && "Index has to be 0 or more.");
+		assert(aIndex < Size && "a index out of bounds!");
 		return myData[aIndex];
 	}
 
 	SA_TEMPLATE
 	inline void SA_TYPE::Insert(int aIndex, Type& aObject)
 	{
-		DL_ASSERT_EXP(aIndex >= 0, "Index has to be 0 or more.");
-		DL_ASSERT_EXP(aIndex < Size, "a index out of bounds!");
+		assert(aIndex >= 0 && "Index has to be 0 or more.");
+		assert(aIndex < Size && "a index out of bounds!");
 		for (int i = Size - 2; i >= aIndex; --i)
 		{
 			myData[i + 1] = myData[i];

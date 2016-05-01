@@ -4,22 +4,16 @@
 #include <CommonHelper.h>
 #include "Engine.h"
 #include "EffectContainer.h"
-#include "Font.h"
-#include "FontProxy.h"
 #include "Model.h"
-#include "ModelAnimated.h"
 #include "ModelLoader.h"
 #include "ModelProxy.h"
 #include "FBXFactory.h"
-#include "Text.h"
-#include "TextProxy.h"
 #include <TimerManager.h>
 #include "SpriteProxy.h"
 #include "Sprite.h"
 #include <XMLReader.h>
 
 #include "DGFXLoader.h"
-#include <istream>
 
 namespace Prism
 {
@@ -45,7 +39,8 @@ namespace Prism
 		, myIsRunning(true)
 		, myCanAddToLoadArray(true)
 		, myCanCopyArray(true)
-		, myModelFactory(nullptr)
+		, myModelFactory(new FBXFactory())
+		, myDGFXLoader(new DGFXLoader())
 		, myIsLoading(false)
 		, myClearLoadJobs(true)
 		, myIsPaused(false)
@@ -55,19 +50,12 @@ namespace Prism
 		myLoadArray.Init(8192);
 		myActiveBuffer = 0;
 		myInactiveBuffer = 1;
-
-#ifdef USE_DGFX
-		myModelFactory = new DGFXLoader();
-#else
-		myModelFactory = new FBXFactory();
-#endif
-
-		LoadInstancedCount();
-		LoadRadiuses();
 	}
 
 	ModelLoader::~ModelLoader()
 	{
+		delete myDGFXLoader;
+
 		delete myModelFactory;
 		myModelFactory = nullptr;
 		myNonFXBModels.DeleteAll();
@@ -83,45 +71,6 @@ namespace Prism
 			SAFE_DELETE(it->second);
 		}
 		mySprites.clear();
-
-		for (auto it = myFontProxies.begin(); it != myFontProxies.end(); ++it)
-		{
-			SAFE_DELETE(it->second);
-		}
-		myFontProxies.clear();
-	}
-
-	void ModelLoader::LoadInstancedCount()
-	{
-		std::ifstream file;
-		file.open("GeneratedData/modelcount.bin");
-		DL_ASSERT_EXP(file.is_open(), "Failed to open modelcount.bin, did you run the DGFX-Tool?");
-		if (file.is_open())
-		{
-			std::string name;
-			int count;
-
-			while (file >> name)
-			{
-				file >> count;
-				myInstancedCount[name] = count;
-			}
-		}
-	}
-
-	int ModelLoader::GetInstancedCount(const std::string& aModelPath)
-	{
-		std::string name = aModelPath.substr(0, aModelPath.rfind("."));
-		name = name.substr(aModelPath.rfind("/")+1, aModelPath.length());
-
-		/*DL_ASSERT_EXP(myInstancedCount.find(name) != myInstancedCount.end()
-			, CU::Concatenate("GetInstancedCount on %s failed", aModelPath.c_str()));*/
-		if (myInstancedCount.find(name) == myInstancedCount.end())
-		{
-			return 2048;
-		}
-
-		return int(myInstancedCount[name] * 1.5f);
 	}
 
 	void ModelLoader::Run()
@@ -129,7 +78,7 @@ namespace Prism
 #ifndef THREADED_LOADING
 		return;
 #else
-		MEMORY_TRACKER_ALLOW_NEW_DURING_RUNTIME(std::this_thread::get_id());
+		MemoryTracker::GetInstance()->AllowNewDuringRunTime(std::this_thread::get_id());
 		while (myIsRunning == true)
 		{
 			if (CheckIfWorking() == false)
@@ -139,8 +88,6 @@ namespace Prism
 
 			WaitUntilCopyIsAllowed();
 			myCanAddToLoadArray = false;
-
-			DEBUG_PRINT("MODELLOADER IS WORKING");
 
 			CopyLoadJobs();
 
@@ -163,44 +110,29 @@ namespace Prism
 
 				switch (loadType)
 				{
-				case eLoadType::MODEL:
+				case Prism::ModelLoader::eLoadType::MODEL:
 				{
 					CreateModel(myLoadArray[i]);
 					break;
 				}
-				case eLoadType::MODEL_ANIMATED:
+				case Prism::ModelLoader::eLoadType::MODEL_ANIMATED:
 				{
 					CreateModelAnimated(myLoadArray[i]);
 					break;
 				}
-				case eLoadType::ANIMATION:
+				case Prism::ModelLoader::eLoadType::ANIMATION:
 				{
 					CreateAnimation(myLoadArray[i]);
 					break;
 				}
-				case eLoadType::CUBE:
+				case Prism::ModelLoader::eLoadType::CUBE:
 				{
 					CreateCube(myLoadArray[i]);
 					break;
 				}
-				case eLoadType::SPRITE:
+				case Prism::ModelLoader::eLoadType::SPRITE:
 				{
 					CreateSprite(myLoadArray[i]);
-					break;
-				}
-				case eLoadType::GUI_BONE:
-				{
-					GetHierarchyToBone(myLoadArray[i]);
-					break;
-				}
-				case eLoadType::FONT:
-				{
-					CreateFont(myLoadArray[i]);
-					break;
-				}
-				case eLoadType::TEXT:
-				{
-					CreateText(myLoadArray[i]);
 					break;
 				}
 				default:
@@ -236,7 +168,7 @@ namespace Prism
 
 	void ModelLoader::Pause()
 	{
-		//DL_ASSERT_EXP(myIsPaused == false, "Can't pause when already paused.");
+		DL_ASSERT_EXP(myIsPaused == false, "Can't pause when already paused.");
 		myIsPaused = true;
 
 		while (myIsLoading == true)
@@ -246,7 +178,7 @@ namespace Prism
 
 	void ModelLoader::UnPause()
 	{
-		//DL_ASSERT_EXP(myIsPaused == true, "Can't unpause when already unpaused.");
+		DL_ASSERT_EXP(myIsPaused == true, "Can't unpause when already unpaused.");
 		myIsPaused = false;
 		if (myBuffers[myInactiveBuffer].Size() == 0)
 		{
@@ -284,28 +216,32 @@ namespace Prism
 		LoadData newData;
 		newData.myModelProxy = proxy;
 		newData.myLoadType = eLoadType::MODEL;
-		newData.myResourcePath = aModelPath;
+		newData.myModelPath = aModelPath;
 		newData.myEffectPath = aEffectPath;
 
 		myBuffers[myInactiveBuffer].Add(newData);
 		myCanCopyArray = true;
 #else
-		bool lightMesh = aEffectPath.find("light_mesh") != std::string::npos;
 		Model* model = nullptr;
-		model = myModelFactory->LoadModel(aModelPath);
-		model->SetEffect(EffectContainer::GetInstance()->GetEffect(aEffectPath));
-		model->myFileName = aModelPath;
 
-		
-		model->Init(GetInstancedCount(aModelPath), lightMesh);
+	#ifdef USE_DGFX
+		#ifdef CONVERT_TO_DGFX_IN_RUNTIME
+			std::string animOutput = CU::GetGeneratedDataFolderFilePath(aModelPath.c_str(), "dgfx");
+			myModelFactory->ConvertToDGFX(aModelPath.c_str(), animOutput.c_str());
+		#endif
+
+		model = myDGFXLoader->LoadModel(aModelPath.c_str()
+			, EffectContainer::GetInstance()->GetEffect(aEffectPath));
+
+	#else
+		model = myModelFactory->LoadModel(aModelPath.c_str(),
+			EffectContainer::GetInstance()->GetEffect(aEffectPath));
+	#endif
 
 		proxy->SetModel(model);
 #endif
 		
 		myModelProxies[aModelPath] = proxy;
-		
-		SetRadius(proxy, aModelPath);
-
 		return proxy;
 	}
 
@@ -327,7 +263,7 @@ namespace Prism
 		LoadData newData;
 		newData.myModelProxy = proxy;
 		newData.myLoadType = eLoadType::MODEL_ANIMATED;
-		newData.myResourcePath = aModelPath;
+		newData.myModelPath = aModelPath;
 		newData.myEffectPath = aEffectPath;
 
 		myBuffers[myInactiveBuffer].Add(newData);
@@ -335,15 +271,22 @@ namespace Prism
 		myCanCopyArray = true;
 #else
 		ModelAnimated* model = nullptr;
-		model = myModelFactory->LoadAnimatedModel(aModelPath.c_str());
-		model->SetEffect(EffectContainer::GetInstance()->GetEffect(aEffectPath));
-		model->myFileName = aModelPath;
-		model->Init();
+
+		#ifdef USE_DGFX
+			#ifdef CONVERT_TO_DGFX_IN_RUNTIME
+				std::string animOutput = CU::GetGeneratedDataFolderFilePath(aModelPath.c_str(), "dgfx");
+				myModelFactory->ConvertToDGFX(aModelPath.c_str(), animOutput.c_str());
+			#endif
+
+			model = myDGFXLoader->LoadAnimatedModel(aModelPath.c_str()
+				, EffectContainer::GetInstance()->GetEffect(aEffectPath));
+		#else
+			model = myModelFactory->LoadModelAnimated(aModelPath.c_str(),
+				EffectContainer::GetInstance()->GetEffect(aEffectPath));
+		#endif
 
 		proxy->SetModelAnimated(model);
 #endif
-
-		SetRadius(proxy, aModelPath);
 
 		myModelProxies[aModelPath] = proxy;
 		return proxy;
@@ -392,13 +335,22 @@ namespace Prism
 
 		LoadData animData;
 		animData.myLoadType = eLoadType::ANIMATION;
-		animData.myResourcePath = aPath;
+		animData.myModelPath = aPath;
 		animData.myAnimationProxy = anim;
 
 		myBuffers[myInactiveBuffer].Add(animData);
 		myCanCopyArray = true;
 #else
-		anim->myAnimation = myModelFactory->LoadAnimation(aPath);
+		#ifdef USE_DGFX
+			#ifdef CONVERT_TO_DGFX_IN_RUNTIME
+				std::string animOutput = CU::GetGeneratedDataFolderFilePath(aPath, "dgfx");
+				myModelFactory->ConvertToDGFX(aPath, animOutput.c_str());
+			#endif
+			anim->myAnimation = myDGFXLoader->LoadAnimation(aPath);
+
+		#else
+			anim->myAnimation = myModelFactory->LoadAnimation(aPath);
+		#endif
 #endif
 
 		return anim;
@@ -423,7 +375,7 @@ namespace Prism
 		myCanCopyArray = false;
 		
 		LoadData newData;
-		newData.myResourcePath = aPath;
+		newData.myModelPath = aPath;
 		newData.mySpriteProxy = proxy;
 		newData.myLoadType = eLoadType::SPRITE;
 		newData.mySize = { aSize.x, aSize.y, aHotSpot.x, aHotSpot.y};
@@ -436,119 +388,6 @@ namespace Prism
 #endif	
 
 		return proxy;
-	}
-
-	SpriteProxy* ModelLoader::LoadSprite(ID3D11Texture2D* aD3D11Texture, const CU::Vector2<float>& aSize
-		, const CU::Vector2<float>& aHotSpot)
-	{
-		SpriteProxy* proxy = new SpriteProxy();
-		proxy->mySprite = nullptr;
-		proxy->SetSize(aSize, aHotSpot);
-
-#ifdef THREADED_LOADING
-		WaitUntilAddIsAllowed();
-		myCanCopyArray = false;
-
-		LoadData newData;
-		newData.myD3D11Texture = aD3D11Texture;
-		newData.mySpriteProxy = proxy;
-		newData.myLoadType = eLoadType::SPRITE;
-		newData.mySize = { aSize.x, aSize.y, aHotSpot.x, aHotSpot.y };
-
-		myBuffers[myInactiveBuffer].Add(newData);
-		myCanCopyArray = true;
-#else
-		proxy->mySprite = new Sprite(aD3D11Texture, aSize, aHotSpot);
-#endif	
-		return proxy;
-	}
-
-	FontProxy* ModelLoader::LoadFont(const std::string& aFilePath, const CU::Vector2<int>& aTextureSize)
-	{
-		if (myFontProxies.find(aFilePath) != myFontProxies.end())
-		{
-			return myFontProxies[aFilePath];
-		}
-
-		FontProxy* proxy = new FontProxy(aFilePath);
-
-#ifdef THREADED_LOADING
-		WaitUntilAddIsAllowed();
-		myCanCopyArray = false;
-
-		LoadData newData;
-		newData.myResourcePath = aFilePath;
-		newData.myFontProxy = proxy;
-		newData.mySize = CU::Vector4<float>(float(aTextureSize.x), float(aTextureSize.y), 0.f, 0.f);
-		newData.myLoadType = eLoadType::FONT;
-
-		myBuffers[myInactiveBuffer].Add(newData);
-		myCanCopyArray = true;
-#else
-		proxy->SetFont(new Font(aFilePath, aTextureSize));
-		myFontProxies[aFilePath] = proxy;
-#endif	
-
-		return proxy;
-	}
-
-	TextProxy* ModelLoader::LoadText(FontProxy* aFontProxy, bool aIs3d, bool aShouldFollowCamera)
-	{
-		TextProxy* proxy = new TextProxy();
-
-#ifdef THREADED_LOADING
-		WaitUntilAddIsAllowed();
-		myCanCopyArray = false;
-
-		LoadData newData;
-		newData.myTextProxy = proxy;
-		newData.myFontProxyToUse = aFontProxy;
-		newData.myLoadType = eLoadType::TEXT;
-		newData.myIs3dText = aIs3d;
-		newData.myShouldFollowCamera = aShouldFollowCamera;
-
-		myBuffers[myInactiveBuffer].Add(newData);
-		myCanCopyArray = true;
-#else
-		proxy->SetText(new Text(*aFontProxy, aIs3d, aShouldFollowCamera));
-#endif	
-
-		return proxy;
-	}
-
-	void ModelLoader::GetHierarchyToBone(const std::string& aAnimationPath, const std::string& aBoneName, GUIBone& aBoneOut)
-	{
-#ifdef THREADED_LOADING
-		WaitUntilAddIsAllowed();
-		myCanCopyArray = false;
-
-		LoadData newData;
-		newData.myResourcePath = aAnimationPath;
-		newData.myBoneName = aBoneName;
-		newData.myGUIBone = &aBoneOut;
-		newData.myLoadType = eLoadType::GUI_BONE;
-
-		myBuffers[myInactiveBuffer].Add(newData);
-		myCanCopyArray = true;
-#else
-		myModelFactory->GetHierarchyToBone(aAnimationPath, aBoneName, aBoneOut);
-		aBoneOut.myIsValid = true;
-#endif	
-	}
-
-	void ModelLoader::SetRadius(ModelProxy* aProxy, const std::string& aModelPath)
-	{
-		float radius = 0;
-		if (myRadiuses.find(aModelPath) == myRadiuses.end())
-		{
-			radius = 25.f;
-		}
-		else
-		{
-			radius = myRadiuses[aModelPath];
-		}
-
-		aProxy->SetRadius(radius);
 	}
 
 	bool ModelLoader::CheckIfWorking()
@@ -599,46 +438,54 @@ namespace Prism
 		}
 	}
 
-	void ModelLoader::LoadRadiuses()
-	{
-		std::fstream file;
-		file.open("GeneratedData/modellist.bin", std::ios::in | std::ios::binary);
-
-		std::string model;
-		float radius = 0;
-		while (file >> model)
-		{
-			file >> radius;
-
-			myRadiuses[model] = radius;
-		}
-	}
-
 	void ModelLoader::CreateModel(LoadData& someData)
 	{
-		Model* model = myModelFactory->LoadModel(someData.myResourcePath);
-		model->SetEffect(EffectContainer::GetInstance()->GetEffect(someData.myEffectPath));
-		model->myFileName = someData.myResourcePath;
+#ifdef USE_DGFX
+#ifdef CONVERT_TO_DGFX_IN_RUNTIME
+		std::string animOutput = CU::GetGeneratedDataFolderFilePath(someData.myModelPath.c_str(), "dgfx");
+		myModelFactory->ConvertToDGFX(someData.myModelPath.c_str(), animOutput.c_str());
+#endif
 
-		bool lightMesh = someData.myEffectPath.find("light_mesh") != std::string::npos;
-		model->Init(GetInstancedCount(someData.myResourcePath), lightMesh);
+		Model* model = myDGFXLoader->LoadModel(someData.myModelPath
+			, EffectContainer::GetInstance()->GetEffect(someData.myEffectPath));
+#else
+		Model* model = myModelFactory->LoadModel(someData.myModelPath.c_str(),
+			EffectContainer::GetInstance()->GetEffect(someData.myEffectPath));
+#endif
 
 		someData.myModelProxy->SetModel(model);
 	}
 
 	void ModelLoader::CreateModelAnimated(LoadData& someData)
 	{
-		ModelAnimated* model = myModelFactory->LoadAnimatedModel(someData.myResourcePath);
-		model->SetEffect(EffectContainer::GetInstance()->GetEffect(someData.myEffectPath));
-		model->myFileName = someData.myResourcePath;
-		model->Init();
+#ifdef USE_DGFX
+#ifdef CONVERT_TO_DGFX_IN_RUNTIME
+		std::string animOutput = CU::GetGeneratedDataFolderFilePath(someData.myModelPath.c_str(), "dgfx");
+		myModelFactory->ConvertToDGFX(someData.myModelPath.c_str(), animOutput.c_str());
+#endif
 
+		ModelAnimated* model = myDGFXLoader->LoadAnimatedModel(someData.myModelPath
+			, EffectContainer::GetInstance()->GetEffect(someData.myEffectPath));
+#else
+		ModelAnimated* model = myModelFactory->LoadModelAnimated(someData.myModelPath.c_str(),
+			EffectContainer::GetInstance()->GetEffect(someData.myEffectPath));
+#endif
 		someData.myModelProxy->SetModelAnimated(model);
 	}
 
 	void ModelLoader::CreateAnimation(LoadData& someData)
 	{
-		someData.myAnimationProxy->myAnimation = myModelFactory->LoadAnimation(someData.myResourcePath);
+#ifdef USE_DGFX
+#ifdef CONVERT_TO_DGFX_IN_RUNTIME
+		std::string animOutput = CU::GetGeneratedDataFolderFilePath(someData.myModelPath.c_str(), "dgfx");
+		myModelFactory->ConvertToDGFX(someData.myModelPath.c_str(), animOutput.c_str());
+#endif
+
+		someData.myAnimationProxy->myAnimation = myDGFXLoader->LoadAnimation(someData.myModelPath);
+#else
+		someData.myAnimationProxy->myAnimation
+			= myModelFactory->LoadAnimation(someData.myModelPath.c_str());
+#endif
 	}
 
 	void ModelLoader::CreateCube(LoadData& someData)
@@ -653,43 +500,18 @@ namespace Prism
 
 	void ModelLoader::CreateSprite(LoadData& someData)
 	{
-		if (someData.myD3D11Texture != nullptr)
+		if (mySprites.find(someData.myModelPath) != mySprites.end())
 		{
-			CU::Vector2<float> size(someData.mySize.x, someData.mySize.y);
-			CU::Vector2<float> hotSpot(someData.mySize.z, someData.mySize.w);
-
-			someData.mySpriteProxy->mySprite = new Sprite(someData.myD3D11Texture, size, hotSpot);
-		}
-		else if (mySprites.find(someData.myResourcePath) != mySprites.end())
-		{
-			someData.mySpriteProxy->mySprite = mySprites[someData.myResourcePath];
+			someData.mySpriteProxy->mySprite = mySprites[someData.myModelPath];
 		}
 		else
 		{
 			CU::Vector2<float> size(someData.mySize.x, someData.mySize.y);
 			CU::Vector2<float> hotSpot(someData.mySize.z, someData.mySize.w);
 
-			mySprites[someData.myResourcePath] = new Sprite(someData.myResourcePath, size, hotSpot);
+			mySprites[someData.myModelPath] = new Sprite(someData.myModelPath, size, hotSpot);
 
-			someData.mySpriteProxy->mySprite = mySprites[someData.myResourcePath];
+			someData.mySpriteProxy->mySprite = mySprites[someData.myModelPath];
 		}
-	}
-
-	void ModelLoader::CreateFont(LoadData& someData)
-	{
-		CU::Vector2<int> size(int(someData.mySize.x), int(someData.mySize.y));
-		someData.myFontProxy->SetFont(new Font(someData.myResourcePath, size));
-		myFontProxies[someData.myFontProxy->GetFilePath()] = someData.myFontProxy;
-	}
-
-	void ModelLoader::CreateText(LoadData& someData)
-	{
-		someData.myTextProxy->SetText(new Text(*someData.myFontProxyToUse, someData.myIs3dText, someData.myShouldFollowCamera));
-	}
-
-	void ModelLoader::GetHierarchyToBone(LoadData& someData)
-	{
-		myModelFactory->GetHierarchyToBone(someData.myResourcePath, someData.myBoneName, *someData.myGUIBone);
-		someData.myGUIBone->myIsValid = true;
 	}
 }

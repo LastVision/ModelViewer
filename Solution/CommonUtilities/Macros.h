@@ -3,6 +3,7 @@
 #define MAX(number1,number2) (((number1) > (number2)) ? number1 : number2)
 #define MIN(number1,number2) (((number1) > (number2)) ? number2 : number1)
 #define SAFE_DELETE(ptr) delete ptr; ptr = nullptr;
+#define SAFE_RELEASE(ptr) ptr->Release(); ptr = nullptr;
 #define FOR_EACH(i, vector) for(i = 0; i < vector.size(); ++i)
 #define FOR_EACH2(vector) for(unsigned int i = 0; i < vector.size(); ++i)
 #define CYCLIC_ERASE(vector, index) vector[index] = vector.back(); vector.pop_back();

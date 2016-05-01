@@ -6,32 +6,29 @@
 #include "DLLApp.h"
 #include "DLLCamera.h"
 #include "DLLModel.h"
-#include "DLLParticle.h"
 #include <EffectContainer.h>
 #include <Engine.h>
 #include <EngineEnums.h>
+#include <FileWatcher.h>
 #include <Instance.h>
 #include <InputWrapper.h>
 #include <Matrix.h>
 #include <Scene.h>
 #include <SetupInfo.h>
 #include <TimerManager.h>
-#include <Room.h>
-#include <ModelLoader.h>
+#include <CommonHelper.h>
 
 #define EngineInstance Prism::Engine::GetInstance()
 #define InputInstance CU::InputWrapper::GetInstance()
 
 DLLApp::DLLApp(int* aHwnd, Prism::SetupInfo& aWindowSetup, WNDPROC aWindowProc)
 {
-	DL_Debug::Debug::Create();
-	myTimeManager = new CU::TimerManager();
-	DL_DEBUG("Startup!");
+	DL_Debug::Debug::Create();;
+	CU::TimerManager::Create();
 
 	myPanelWindowHandler = (HWND)aHwnd;
-	DL_DEBUG("Handle");
 	Prism::Engine::Create(myEngineWindowHandler, aWindowProc, aWindowSetup);
-	DL_DEBUG("Engine Created!");
+
 	SetupLight();
 	SetupInput();
 	SetParentWindow(aWindowSetup);
@@ -40,75 +37,50 @@ DLLApp::DLLApp(int* aHwnd, Prism::SetupInfo& aWindowSetup, WNDPROC aWindowProc)
 	CU::Vector2<float> windowSize(aWindowSetup.myScreenWidth, aWindowSetup.myScreenHeight);
 	myCamera = new DLLCamera(windowSize, 1.0f, 1.0f, 1.0f);
 	myModel = new DLLModel();
-	myParticle = new DLLParticle();
-	myScene.SetCamera(*myCamera->GetCamera());
-	myRoom = new Prism::Room({ 0.f,0.f,0.f }, { 800.f,800.f,800.f }, "Preview Room", Prism::eRoomType::ROOM);
-	myScene.AddRoom(myRoom);
-	//LoadModel("Data/Resource/Model/SM_dev_box_small2.fbx", "Data/Resource/Shader/S_effect_pbldebug.fx");
-	LoadParticle("Data/Resource/Particle/P_emitter_example.xml");
 }
 
 DLLApp::~DLLApp()
 {
-
-	delete myRoom; 
-	myRoom = nullptr;
-
-	delete myTimeManager;
-	myTimeManager = nullptr;
-
 	delete myCamera;
 	myCamera = nullptr;
 
 	delete myModel;
 	myModel = nullptr;
-
-	delete myParticle;
-	myParticle = nullptr;
 }
 
 void DLLApp::Render()
 {
 	Prism::Engine::GetInstance()->Render();
-	myParticle->Render(myCamera->GetCamera());
-}
 
-void DLLApp::RenderScene()
-{
-	myScene.Render();
+	myDirectionalLight->Update();
+	myDirectionalLightData[0].myDirection = myDirectionalLight->GetCurrentDir();
+	myDirectionalLightData[0].myColor = myDirectionalLight->GetColor();
+
+	if (myModel->GetInstance() != nullptr)
+	{
+		myModel->GetInstance()->UpdateDirectionalLights(myDirectionalLightData);
+		myModel->GetInstance()->Render(*myCamera->GetCamera());
+	}
+
+	Prism::DebugDrawer::GetInstance()->Render(*myCamera->GetCamera());
 }
 
 void DLLApp::Update()
 {
-	myTimeManager->Update();
-	float deltaTime = myTimeManager->GetMasterTimer().GetTime().GetFrameTime();
-	myCamera->Update(deltaTime);
+	CU::TimerManager::GetInstance()->Update();
+	float deltaTime = CU::TimerManager::GetInstance()->GetMasterTimer().GetTime().GetFrameTime();
 	CU::InputWrapper::GetInstance()->Update();
 	LogicUpdate(deltaTime);
 }
 
-void DLLApp::RemoveActiveModel()
-{
-	if (myModel->GetInstance() != nullptr)
-	{
-		myScene.RemoveInstance(myModel->GetInstance());
-	}
-}
-
 void DLLApp::LoadModel(const char* aModelFile, const char* aShaderFile)
 {
-	RemoveActiveModel();
-	myModel->LoadModel(aModelFile, aShaderFile);
+	std::string shaderFile = CU::GetRealDataFolderFilePath(aShaderFile, "fx");
+	DL_DEBUG(shaderFile.c_str());
+	
+	myModel->LoadModel(aModelFile, shaderFile.c_str());
 	myModelFile = aModelFile;
-	myShaderFile = aShaderFile;
-	myScene.AddInstance(myModel->GetInstance(), true);
-}
-
-void DLLApp::LoadParticle(const char* aParticleFile)
-{
-	DL_ASSERT_EXP(myParticle != nullptr, "myParticle dont exists!");
-	std::string particleFile = aParticleFile;
-	myParticle->LoadParticle(particleFile);
+	myShaderFile = shaderFile;
 }
 
 void DLLApp::SetClearColor(CU::Vector4f& aClearColor)
@@ -124,8 +96,7 @@ void DLLApp::SetCubeMap(const char* aCubeMapFile)
 
 void DLLApp::LogicUpdate(float aDeltaTime)
 {
-	if (GetActiveWindow()) 
-	{
+	if (GetActiveWindow()) {
 		if (InputInstance->KeyIsPressed(DIK_LALT) && InputInstance->MouseIsPressed(0))
 		{
 			myCamera->Zoom(aDeltaTime, myMouseSensitivty);
@@ -144,7 +115,6 @@ void DLLApp::LogicUpdate(float aDeltaTime)
 		}
 	}
 	myModel->Update(aDeltaTime);
-	myParticle->Update(aDeltaTime);
 }
 
 void DLLApp::SetupCubeMap()
@@ -170,10 +140,10 @@ void DLLApp::SetParentWindow(Prism::SetupInfo &aWindowSetup)
 void DLLApp::SetupLight()
 {
 	myDirectionalLight = new Prism::DirectionalLight();
-	myDirectionalLight->SetDir(CU::Vector3f(0.f, 0.f, -1.f));
+	myDirectionalLight->SetDir(CU::Vector3f( 0.f, 0.f, -1.f ));
 	myDirectionalLight->SetColor(CU::Vector4f(1.f, 1.f, 1.f, 1.f));
 
-	myScene.AddLight(myDirectionalLight);
+	memset(&myDirectionalLightData[0], 0, sizeof(Prism::DirectionalLightData) * NUMBER_OF_DIRECTIONAL_LIGHTS);
 }
 
 void DLLApp::SetDirectionalLightRotation(CU::Vector3f aRotation)

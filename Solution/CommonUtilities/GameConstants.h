@@ -1,33 +1,19 @@
 #pragma once
 
-class GC
+namespace GC
 {
-public:
-	enum class eMultiplayerMode
-	{
-		HOST,
-		JOIN
-	};
+	const int playerGruntCount = 10;
+	const int playerRangerCount = 10;
+	const int playerTankCount = 10;
+	const int playerUnitCount = playerGruntCount + playerRangerCount + playerTankCount;
 
-	static bool GenerateLightData;
-	static bool GenerateCubeMap;
-	static int SHNodeSize;
+	const int enemyGruntCount = 10;
+	const int enemyRangerCount = 10;
+	const int enemyTankCount = 10;
+	const int enemyUnitCount = enemyGruntCount + enemyRangerCount + enemyTankCount;
 
-	static bool EnableCheapAmbient;
-	static bool EnableVSync;
+	const int resourcePointCount = 16;
+	const int victoryPointCount = 16;
 
-	static int Difficulty;
-	static float DamageMultiplier[3];
-	static float SpawnIntervalMultiplier[3];
-
-	static volatile bool PlayerAlive;
-
-	static volatile bool PlayerShouldPlaySprintErrorSound;
-
-	static eMultiplayerMode MultiplayerMode;
-
-	static volatile bool PlayerShouldPlaySprintSound;
-	static volatile bool PlayerShouldStopSprintSound;
-
-	static bool ShouldRenderGUI;
-};
+	const int directorUnitCap = 60;
+}

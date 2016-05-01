@@ -6,102 +6,9 @@
 #include "Vector.h"
 #include <ShlObj.h>
 #include <sstream>
-#include <fstream>
-#include <streambuf>
 
 namespace CU
 {
-	const std::string group("/Distortion Games/");
-	const std::string game("Machina/");
-
-	static bool canSave;
-
-	inline bool dirExists(const std::string& dirName_in)
-	{
-		DWORD ftyp = GetFileAttributesA(dirName_in.c_str());
-		if (ftyp == INVALID_FILE_ATTRIBUTES)
-			return false;  //something is wrong with your path!
-
-		if (ftyp & FILE_ATTRIBUTE_DIRECTORY)
-			return true;   // this is a directory!
-
-		return false;    // this is not a directory!
-	}
-
-	inline void BuildFoldersInPath(const std::string& aPath)
-	{
-		unsigned int slashIndex = aPath.find_first_of("/");
-
-		while (slashIndex != std::string::npos)
-		{
-			std::string folder(aPath.begin(), aPath.begin() + slashIndex);
-			CreateDirectory(folder.c_str(), NULL);
-			slashIndex = aPath.find_first_of("/", slashIndex + 1);
-		}
-	}
-
-	inline void BuildFoldersInPathWithDoubleSlash(const std::string& aPath)
-	{
-		unsigned int slashIndex = aPath.find_first_of("\\");
-
-		while (slashIndex != std::string::npos)
-		{
-			std::string folder(aPath.begin(), aPath.begin() + slashIndex);
-			CreateDirectory(folder.c_str(), NULL);
-			slashIndex = aPath.find_first_of("\\", slashIndex + 1);
-		}
-	}
-
-	inline bool FileExists(const std::string& name) {
-		std::ifstream f(name.c_str());
-		if (f.good()) {
-			f.close();
-			return true;
-		}
-		f.close();
-		return false;
-	}
-
-	inline void CreateMyDocumentsFolderPath()
-	{
-		char documents[MAX_PATH];
-		HRESULT hr = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, documents);
-		if (hr != S_OK)
-		{
-			canSave = false;
-			DL_ASSERT("Can't get document folder!");
-		}
-
-		if (dirExists(documents + group + game) == false)
-		{
-			BuildFoldersInPath(documents + group + game);
-		}
-	}
-
-	inline void CreateFileIfNotExists(const std::string& aFilePath)
-	{
-		if (FileExists(aFilePath) == false)
-		{
-			std::ofstream outFile(aFilePath.c_str());
-			//outFile << "apa";
-			outFile.close();
-		}
-	}
-
-	inline std::string GetMyDocumentFolderPath()
-	{
-		char documents[MAX_PATH];
-		HRESULT hr = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, documents);
-		if (hr != S_OK)
-		{
-			DL_ASSERT("Can't get document folder!");
-		}
-		std::stringstream ss;
-		ss << documents;
-		ss << group << game;
-		return ss.str();
-	}
-
 	inline std::string ToLower(const std::string& aString)
 	{
 		std::string data = aString;
@@ -141,45 +48,43 @@ namespace CU
 		return toReturn;
 	}
 
-	inline std::string GetSubString(const std::string& aStringToReadFrom, const std::string& aToFind, bool aReadCharactersBeforeToFind
+	inline std::string GetSubString(const std::string& aStringToReadFrom, const std::string& aWordToFind, bool aReadAfterChar
 		, int someCharsToSkip = 0)
 	{
-		if (aStringToReadFrom.find(aToFind) != std::string::npos)
+		std::string toReturn;
+		if (aStringToReadFrom.rfind(aWordToFind) != std::string::npos)
 		{
-			if (aReadCharactersBeforeToFind == true)
+			if (aReadAfterChar == false)
 			{
-				return aStringToReadFrom.substr(0, aStringToReadFrom.find(aToFind));
+				return toReturn = aStringToReadFrom.substr(0, aStringToReadFrom.rfind(aWordToFind));
 			}
-
-			return aStringToReadFrom.substr(aStringToReadFrom.find(aToFind) + someCharsToSkip);
-
+			else if (aReadAfterChar == true)
+			{
+				return toReturn = aStringToReadFrom.substr(aStringToReadFrom.rfind(aWordToFind) + (someCharsToSkip - 1));
+			}
 		}
-
 		return aStringToReadFrom;
 	}
-
-	inline bool CheckSubString(const std::string& aString, const std::string& aToFind)
+	inline std::string GetMyDocumentFolderPath()
 	{
-		if (aString.find(aToFind) != aString.npos)
-			return true;
-
-		return false;
-	}
-
-	inline std::string ReplaceAllInString(std::string str, const std::string& from, const std::string& to) {
-		size_t start_pos = 0;
-		while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
-			str.replace(start_pos, from.length(), to);
-			start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+		char documents[MAX_PATH];
+		HRESULT hr = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, documents);
+		if (hr != S_OK) 
+		{
+			DL_ASSERT("Can't get document folder!");
 		}
-		return str;
+		std::stringstream ss;
+		ss << documents;
+		ss << "\\Distortion Games\\";
+		return ss.str();
 	}
 
 	//If OptionalExtension is blank, the outputstring will have the same extension as the input string
 	//OptionalExtension needs to be entered without a period, "xml", NOT ".xml"
 	inline std::string GetGeneratedDataFolderFilePath(const std::string& aFilePath, const std::string& anOptionalNewExtension = "")
 	{
-		std::string pathWithoutData(aFilePath.begin() + 5, aFilePath.end());
+		std::string pathWithoutData = GetSubString(aFilePath, "Data", true, 5);
+		//std::string pathWithoutData(aFilePath.begin() + 14, aFilePath.end());
 
 		if (anOptionalNewExtension != "")
 		{
@@ -188,38 +93,26 @@ namespace CU
 			pathWithoutData += anOptionalNewExtension;
 		}
 
-		std::string generatedDataFilePath = "GeneratedData/";
-		generatedDataFilePath += pathWithoutData;
+		std::string realDataFilePath = "GeneratedData/";
+		realDataFilePath += pathWithoutData;
 
-		return generatedDataFilePath;
-	}
+		size_t found = realDataFilePath.find_first_of('\\');
 
-	//If OptionalExtension is blank, the outputstring will have the same extension as the input string
-	//OptionalExtension needs to be entered without a period, "xml", NOT ".xml"
-	inline std::string GetMyDocumentsDataPath(const std::string& aFilePath, const std::string& anOptionalNewExtension = "")
-	{
-		std::string pathWithoutData(aFilePath.begin() + 5, aFilePath.end());
-
-		if (anOptionalNewExtension != "")
+		while (found != std::string::npos)
 		{
-			int extensionIndex = pathWithoutData.find_last_of(".");
-			pathWithoutData = std::string(pathWithoutData.begin(), pathWithoutData.begin() + extensionIndex + 1);
-			pathWithoutData += anOptionalNewExtension;
+			realDataFilePath[found] = '/';
+			found = realDataFilePath.find_first_of('\\', found + 1);
 		}
-		std::string documentsPath = GetMyDocumentFolderPath();
-		documentsPath += pathWithoutData;
 
-		documentsPath = ReplaceAllInString(documentsPath, "/", "\\");
-		BuildFoldersInPathWithDoubleSlash(documentsPath);
-
-		return documentsPath;
+		return realDataFilePath;
 	}
 
 	//If OptionalExtension is blank, the outputstring will have the same extension as the input string
 	//OptionalExtension needs to be entered without a period, "xml", NOT ".xml"
 	inline std::string GetRealDataFolderFilePath(const std::string& aFilePath, const std::string& anOptionalNewExtension = "")
 	{
-		std::string pathWithoutData(aFilePath.begin() + 14, aFilePath.end());
+		std::string pathWithoutData = GetSubString(aFilePath, "Data", true, 1);
+		//std::string pathWithoutData(aFilePath.begin() + 14, aFilePath.end());
 
 		if (anOptionalNewExtension != "")
 		{
@@ -228,10 +121,30 @@ namespace CU
 			pathWithoutData += anOptionalNewExtension;
 		}
 
-		std::string realDataFilePath = "Data/";
-		realDataFilePath += pathWithoutData;
+		std::string realDataFilePath;
+		realDataFilePath = pathWithoutData;
+		
+		size_t found = realDataFilePath.find_first_of('\\');
+
+		while (found != std::string::npos)
+		{
+			realDataFilePath[found] = '/';
+			found = realDataFilePath.find_first_of('\\', found + 1);
+		}
 
 		return realDataFilePath;
+	}
+
+	inline void BuildFoldersInPath(const std::string& aPath)
+	{
+		unsigned int slashIndex = aPath.find_first_of("/");
+
+		while (slashIndex != std::string::npos)
+		{
+			std::string folder(aPath.begin(), aPath.begin() + slashIndex);
+			CreateDirectory(folder.c_str(), NULL);
+			slashIndex = aPath.find_first_of("/", slashIndex + 1);
+		}
 	}
 
 	inline std::string Concatenate(const char* aFormattedString, ...)
@@ -282,7 +195,7 @@ namespace CU
 		unsigned int end = aString.length();
 		if (end > begin)
 		{
-			while (aString[end - 1] == ' ')
+			while (aString[end-1] == ' ')
 			{
 				--end;
 			}
@@ -299,7 +212,7 @@ namespace CU
 		//to radians:
 		Vector3<float> rotation(aRotationInDegrees);
 		rotation *= 0.0174532925f;
-
+		
 		aMatrixToRotate = Matrix44<float>::CreateRotateAroundZ(rotation.z) * aMatrixToRotate;
 		aMatrixToRotate = Matrix44<float>::CreateRotateAroundY(rotation.y) * aMatrixToRotate;
 		aMatrixToRotate = Matrix44<float>::CreateRotateAroundX(rotation.x) * aMatrixToRotate;
@@ -312,19 +225,5 @@ namespace CU
 		return aValue == 2 || aValue == 4 || aValue == 8 || aValue == 16 || aValue == 32 || aValue == 64 || aValue == 128
 			|| aValue == 256 || aValue == 512 || aValue == 1024 || aValue == 2048 || aValue == 4096 || aValue == 8192
 			|| aValue == 1024 * 6;
-	}
-
-	inline const std::string ReadFileToString(const std::string& aFilePath)
-	{
-		std::string toReturn;
-		std::ifstream file(aFilePath);
-
-		file.seekg(0, std::ios::end);
-		toReturn.reserve(static_cast<unsigned int>(file.tellg()));
-		file.seekg(0, std::ios::beg);
-
-		toReturn.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-		file.close();
-		return toReturn;
 	}
 }

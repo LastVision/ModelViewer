@@ -32,7 +32,7 @@ namespace Prism
 
 		//void RenderLine2D(const CU::Vector2<float>& aFirstPoint, const CU::Vector2<float> aSecondPoint
 		//	, const CU::Vector4<float>& aColor = PINK_DEBUG);
-		void RenderLine3D(const CU::Vector3<float>& aFirstPoint, const CU::Vector3<float>& aSecondPoint
+		void RenderLine3D(const CU::Vector3<float>& aFirstPoint, const CU::Vector3<float> aSecondPoint
 			, eColorDebug aColor = eColorDebug::PINK, eColorDebug aSecondColor = eColorDebug::NOT_USED);
 		//void RenderArrow2D(const CU::Vector2<float>& aFirstPoint, const CU::Vector2<float> aSecondPoint
 		//	, const CU::Vector4<float>& aColor = PINK_DEBUG);
@@ -53,11 +53,9 @@ namespace Prism
 		void RenderText(const char* aName, const CU::Vector4<float>& aValue);
 		void RenderText(const char* aName, float aValue);
 		void RenderText(const char* aName, int aValue);
-		void RenderText(const char* aName, unsigned int aValue);
 		void RenderText(const char* aName, const std::string& aValue);
 
-		void RenderTextToScreen();
-		void RenderLinesToScreen(const Camera& aCamera);
+		void Render(const Camera& aCamera);
 
 	private:
 
@@ -85,7 +83,7 @@ namespace Prism
 
 #pragma warning(disable: 4505)
 
-	static void RenderLine3D(const CU::Vector3<float>& aFirstPoint, const CU::Vector3<float>& aSecondPoint
+	static void RenderLine3D(const CU::Vector3<float>& aFirstPoint, const CU::Vector3<float> aSecondPoint
 		, eColorDebug aColor = eColorDebug::PINK, eColorDebug aSecondColor = eColorDebug::NOT_USED)
 	{
 		DebugDrawer::GetInstance()->RenderLine3D(aFirstPoint, aSecondPoint, aColor, aSecondColor);

@@ -7,9 +7,6 @@ namespace Prism
 {
 	struct CurveAnimationFrame
 	{
-		CurveAnimationFrame()
-			: myAngle(0.f)
-		{}
 		float myAngle;
 		CU::Vector3<float> myDirection;
 		CU::Vector3<float> myTranslation;

@@ -19,8 +19,6 @@ namespace CU
 		int ClassifySpherePlane(Vector3<T> aSpherePosition, float aSphereRadius) const;
 		Vector3<T> GetNormal() const;
 
-		Vector3<T> IntersectionThreePlanes(const Plane<T>& aSecondPlane, const Plane<T>& aThirdPlane) const;
-
 		Vector4<T> myABCD;
 	};
 }
@@ -68,8 +66,7 @@ namespace CU
 	template <typename T>
 	void Plane<T>::InitWith3Points(Vector3<T> aFirstPoint, Vector3<T> aSecondPoint, Vector3<T> aThirdPoint)
 	{
-		Vector3<T> normal = Cross(aSecondPoint - aFirstPoint, aFirstPoint - aThirdPoint);
-		CU::Normalize(normal);
+		Vector3<T> normal = Cross(aSecondPoint - aFirstPoint, aThirdPoint - aSecondPoint);
 
 		myABCD.x = normal.x;
 		myABCD.y = normal.y;
@@ -118,26 +115,8 @@ namespace CU
 	}
 
 	template <typename T>
-	inline Vector3<T> Plane<T>::GetNormal() const
+	Vector3<T> Plane<T>::GetNormal() const
 	{
 		return Vector3<T>(myABCD.x, myABCD.y, myABCD.z);
-	}
-
-	template <typename T>
-	Vector3<T> Plane<T>::IntersectionThreePlanes(const Plane<T>& aSecondPlane, const Plane<T>& aThirdPlane) const
-	{
-		Vector3<T> firstPlaneNormal = GetNormal();
-		Vector3<T> secondPlaneNormal = aSecondPlane.GetNormal();
-		Vector3<T> thirdPlaneNormal = aThirdPlane.GetNormal();
-
-		T firstPlaneD = myABCD.w;// Dot(firstPlaneNormal, myPoint);
-		T secondPlaneD = aSecondPlane.myABCD.w;// Dot(secondPlaneNormal, aSecondPlane.myPoint);
-		T thirdPlaneD = aThirdPlane.myABCD.w;// Dot(thirdPlaneNormal, aThirdPlane.myPoint);
-
-		Vector3<T> interSectionPoint = (firstPlaneD * Cross(secondPlaneNormal, thirdPlaneNormal));
-		interSectionPoint += (secondPlaneD * Cross(thirdPlaneNormal, firstPlaneNormal));
-		interSectionPoint += (thirdPlaneD * Cross(firstPlaneNormal, secondPlaneNormal));
-		interSectionPoint /= Dot(Cross(firstPlaneNormal, secondPlaneNormal), thirdPlaneNormal);
-		return interSectionPoint;
 	}
 }

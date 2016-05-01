@@ -3,7 +3,6 @@
 #include <Defines.h>
 #include <InputWrapper.h>
 #include <LightStructs.h>
-#include <Scene.h>
 #include <string>
 #include <StaticArray.h>
 #include <Vector.h>
@@ -11,22 +10,18 @@
 
 class DLLCamera;
 class DLLModel;
-class DLLParticle;
-
 
 namespace Prism
 {
 	class DirectionalLight;
 	class Scene;
-	class Room;
-	class Instance;
+
 	struct SetupInfo;
 };
 
 namespace CU
 {
 	class InputWrapper;
-	class TimerManager;
 }
 
 class DLLApp
@@ -36,13 +31,9 @@ public:
 	~DLLApp();
 
 	void Render();
-	void RenderScene();
 	void Update();
 
-	void RemoveActiveModel();
-
 	void LoadModel(const char* aModelFile, const char* aShaderFile);
-	void LoadParticle(const char* aParticleFile);
 
 	void SetClearColor(CU::Vector4f& aClearColor);
 	void SetCubeMap(const char* aCubeMapFile);
@@ -59,6 +50,7 @@ public:
 private:
 	void LogicUpdate(float aDeltaTime);
 
+
 	bool HasMouseDeltaXMoved();
 	bool HasMouseDeltaYMoved();
 
@@ -69,12 +61,11 @@ private:
 
 	DLLCamera* myCamera;
 	DLLModel* myModel;
-	DLLParticle* myParticle;
-	Prism::Instance* myInstance;
-	CU::TimerManager* myTimeManager;
-
 
 	Prism::DirectionalLight* myDirectionalLight;
+	CU::StaticArray<Prism::DirectionalLightData, NUMBER_OF_DIRECTIONAL_LIGHTS> myDirectionalLightData;
+	Prism::Scene* myScene;
+
 	CU::Vector3f myDirectionalLightRotation;
 
 	float myMouseSensitivty;
@@ -84,9 +75,6 @@ private:
 
 	std::string myModelFile;
 	std::string myShaderFile;
-
-	Prism::Scene myScene;
-	Prism::Room* myRoom;
 };
 
 inline bool DLLApp::HasMouseDeltaYMoved()

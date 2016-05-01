@@ -9,32 +9,18 @@
 
 namespace Prism
 {
-	PointLight::PointLight(unsigned int aGID, bool aAmbientOnly)
-		: myGID(aGID)
-		, myAmbientOnly(aAmbientOnly)
-		, myRange(0)
-		, myLightMesh(nullptr)
+
+	void PointLight::Initiate()
 	{
-		ModelProxy* model = ModelLoader::GetInstance()->LoadModel("Data/Resource/Model/Light_mesh/SM_sphere.fbx"
-			, "Data/Resource/Shader/S_effect_deferred_light_mesh_point.fx");
-		myLightMesh = new Instance(*model, myOrientation);
+		myObjectCullingRadius = 10.f;
+		ModelProxy* model = ModelLoader::GetInstance()->LoadCube(1, 1, 1);
+		myInstance = new Instance(*model, myOrientation, eOctreeType::NOT_IN_OCTREE, myObjectCullingRadius);
 	}
 
-	PointLight::~PointLight()
+	void PointLight::Render(Camera* aCamera)
 	{
-		SAFE_DELETE(myLightMesh);
-	}
-
-	void PointLight::Update()
-	{
-		myLightData.myColor = GetColor();
-		myLightData.myPosition = GetPosition();
-		myLightData.myRange = GetRange();
-	}
-
-	void PointLight::Render(const Camera& aCamera)
-	{
-		myLightMesh->Render(aCamera);
+		if (this != nullptr)
+			myInstance->Render(*aCamera);
 	}
 
 };

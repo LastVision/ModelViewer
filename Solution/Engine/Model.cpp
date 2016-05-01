@@ -19,6 +19,7 @@ namespace Prism
 		: BaseModel()
 		, myChildren(32)
 		, myChildTransforms(32)
+		, myVertexFormat(8)
 		, myIsNULLObject(true)
 		, myVertexBaseData(nullptr)
 		, myIndexBaseData(nullptr)
@@ -27,97 +28,48 @@ namespace Prism
 		, myInited(false)
 		, myParent(nullptr)
 		, myVertexCount(0)
-		, myMaxInstances(0)
-		, myInstancingMatrixBuffer(nullptr)
-		, myInstancingScaleBuffer(nullptr)
-		, myInstancingHeightBuffer(nullptr)
-		, myMatrices(128)
-		, myScales(128)
-		, myHeights(128)
 	{
-		myInstancingBufferDesc = new D3D11_BUFFER_DESC();
 	}
 
 	Model::~Model()
 	{
 		myChildren.DeleteAll();
+		myVertexFormat.DeleteAll();
 		delete myVertexBaseData;
 		delete myIndexBaseData;
-		SAFE_DELETE(myInstancingBufferDesc);
-		
-		if (myInstancingMatrixBuffer != nullptr && myInstancingMatrixBuffer->myVertexBuffer != nullptr)
-		{
-			myInstancingMatrixBuffer->myVertexBuffer->Release();
-			delete myInstancingMatrixBuffer;
-		}
-
-		if (myInstancingScaleBuffer != nullptr && myInstancingScaleBuffer->myVertexBuffer != nullptr)
-		{
-			myInstancingScaleBuffer->myVertexBuffer->Release();
-			delete myInstancingScaleBuffer;
-		}
-
-		if (myInstancingHeightBuffer != nullptr && myInstancingHeightBuffer->myVertexBuffer != nullptr)
-		{
-			myInstancingHeightBuffer->myVertexBuffer->Release();
-			delete myInstancingHeightBuffer;
-		}
 	}
 
-	void Model::Init(int aMaxInstances, bool aLightMesh)
+	void Model::Init()
 	{
 		DL_ASSERT_EXP(myInited == false, "Tried to Init a model twice");
 
-		myMaxInstances = aMaxInstances;
 		if (myIsNULLObject == false)
 		{
-			const int size = myVertexFormat.Size() + 6;
+			const int size = myVertexFormat.Size();
 			D3D11_INPUT_ELEMENT_DESC* vertexDesc = new D3D11_INPUT_ELEMENT_DESC[size];
 			for (int i = 0; i < myVertexFormat.Size(); ++i)
 			{
 				vertexDesc[i] = *myVertexFormat[i];
 			}
 
-			if (aLightMesh == false)
-			{
-				vertexDesc[myVertexFormat.Size() + 0] = { "myWorld", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 };
-				vertexDesc[myVertexFormat.Size() + 1] = { "myWorld", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1 };
-				vertexDesc[myVertexFormat.Size() + 2] = { "myWorld", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1 };
-				vertexDesc[myVertexFormat.Size() + 3] = { "myWorld", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1 };
-
-				vertexDesc[myVertexFormat.Size() + 4] = { "myScale", 0, DXGI_FORMAT_R32G32B32_FLOAT, 2, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 };
-				vertexDesc[myVertexFormat.Size() + 5] = { "myHeight", 0, DXGI_FORMAT_R32_FLOAT, 3, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1 };
-			}
-
-			
-			if (aLightMesh == false)
-			{
-				EvaluateEffectTechnique(true);
-				InitInputLayout(vertexDesc, size, "Model::InputLayout");
-			}
-			else
-			{
-				//EvaluateEffectTechnique(false);
-				myTechniqueName = "Render";
-				InitInputLayout(vertexDesc, size-6, "Model::InputLayout");
-			}
+			EvaluateEffectTechnique();
+			InitInputLayout(vertexDesc, size, "Model::InputLayout");
 			delete[] vertexDesc;
 			InitVertexBuffer(myVertexBaseData->myStride, D3D11_USAGE_IMMUTABLE, 0);
 			InitIndexBuffer();
-			InitInstancingBuffers();
 
 			SetupVertexBuffer(myVertexBaseData->myNumberOfVertices
 				, myVertexBaseData->myStride, myVertexBaseData->myVertexData, "Model::VertexBuffer");
 
 			SetupIndexBuffer(myIndexBaseData->myNumberOfIndices, myIndexBaseData->myIndexData, "Model::IndexBuffer");
-			SetupInstancingBuffers();
+
 			myVertexCount = myVertexBaseData->myNumberOfVertices;
 		}
 
 		for (int i = 0; i < myChildren.Size(); ++i)
 		{
 			myChildren[i]->myFileName = myFileName;
-			myChildren[i]->Init(myMaxInstances, aLightMesh);
+			myChildren[i]->Init();
 		}
 
 
@@ -138,7 +90,7 @@ namespace Prism
 	void Model::InitCube(const float aWidth, const float aHeight, const float aDepth, CU::Vector4f aColour)
 	{
 		DL_ASSERT_EXP(myInited == false, "Tried to Init a model twice");
-		myEffect = EffectContainer::GetInstance()->GetEffect("Data/Resource/Shader/S_effect_cube3d.fx");
+		myEffect = EffectContainer::GetInstance()->GetEffect("Data/Resource/Shader/S_effect_cube_colored.fx");
 
 
 		if (myEffect == nullptr)
@@ -163,40 +115,40 @@ namespace Prism
 		float halfDepth = aDepth / 2.f;
 
 		//0 - 3 (Top)
-		vertices.Add({ { -halfWidth, halfHeight, -halfDepth, 0.f }, aColour });
-		vertices.Add({ { halfWidth, halfHeight, -halfDepth, 0.f }, aColour });
-		vertices.Add({ { halfWidth, halfHeight, halfDepth, 0.f }, aColour });
-		vertices.Add({ { -halfWidth, halfHeight, halfDepth, 0.f }, aColour });
+		vertices.Add({ { -halfWidth, halfHeight, -halfDepth }, aColour });
+		vertices.Add({ { halfWidth, halfHeight, -halfDepth }, aColour });
+		vertices.Add({ { halfWidth, halfHeight, halfDepth }, aColour });
+		vertices.Add({ { -halfWidth, halfHeight, halfDepth }, aColour });
 
 		//4 - 7 (Bottom)
-		vertices.Add({ { -halfWidth, -halfHeight, -halfDepth, 0.f }, aColour });
-		vertices.Add({ { halfWidth, -halfHeight, -halfDepth, 0.f }, aColour });
-		vertices.Add({ { halfWidth, -halfHeight, halfDepth, 0.f }, aColour });
-		vertices.Add({ { -halfWidth, -halfHeight, halfDepth, 0.f }, aColour });
+		vertices.Add({ { -halfWidth, -halfHeight, -halfDepth }, aColour });
+		vertices.Add({ { halfWidth, -halfHeight, -halfDepth }, aColour });
+		vertices.Add({ { halfWidth, -halfHeight, halfDepth }, aColour });
+		vertices.Add({ { -halfWidth, -halfHeight, halfDepth }, aColour });
 
 		//8 - 11 (Left)
-		vertices.Add({ { -halfWidth, -halfHeight, halfDepth, 0.f }, aColour });
-		vertices.Add({ { -halfWidth, -halfHeight, -halfDepth, 0.f }, aColour });
-		vertices.Add({ { -halfWidth, halfHeight, -halfDepth, 0.f }, aColour });
-		vertices.Add({ { -halfWidth, halfHeight, halfDepth, 0.f }, aColour });
+		vertices.Add({ { -halfWidth, -halfHeight, halfDepth }, aColour });
+		vertices.Add({ { -halfWidth, -halfHeight, -halfDepth }, aColour });
+		vertices.Add({ { -halfWidth, halfHeight, -halfDepth }, aColour });
+		vertices.Add({ { -halfWidth, halfHeight, halfDepth }, aColour });
 
 		//12 - 15 (Right)
-		vertices.Add({ { halfWidth, -halfHeight, halfDepth, 0.f }, aColour });
-		vertices.Add({ { halfWidth, -halfHeight, -halfDepth, 0.f }, aColour });
-		vertices.Add({ { halfWidth, halfHeight, -halfDepth, 0.f }, aColour });
-		vertices.Add({ { halfWidth, halfHeight, halfDepth, 0.f }, aColour });
+		vertices.Add({ { halfWidth, -halfHeight, halfDepth }, aColour });
+		vertices.Add({ { halfWidth, -halfHeight, -halfDepth }, aColour });
+		vertices.Add({ { halfWidth, halfHeight, -halfDepth }, aColour });
+		vertices.Add({ { halfWidth, halfHeight, halfDepth }, aColour });
 
 		//16 - 19 (Front)
-		vertices.Add({ { -halfWidth, -halfHeight, -halfDepth, 0.f }, aColour });
-		vertices.Add({ { halfWidth, -halfHeight, -halfDepth, 0.f }, aColour });
-		vertices.Add({ { halfWidth, halfHeight, -halfDepth, 0.f }, aColour });
-		vertices.Add({ { -halfWidth, halfHeight, -halfDepth, 0.f }, aColour });
+		vertices.Add({ { -halfWidth, -halfHeight, -halfDepth }, aColour });
+		vertices.Add({ { halfWidth, -halfHeight, -halfDepth }, aColour });
+		vertices.Add({ { halfWidth, halfHeight, -halfDepth }, aColour });
+		vertices.Add({ { -halfWidth, halfHeight, -halfDepth }, aColour });
 
 		//20 - 23 (Back)
-		vertices.Add({ { -halfWidth, -halfHeight, halfDepth, 0.f }, aColour });
-		vertices.Add({ { halfWidth, -halfHeight, halfDepth, 0.f }, aColour });
-		vertices.Add({ { halfWidth, halfHeight, halfDepth, 0.f }, aColour });
-		vertices.Add({ { -halfWidth, halfHeight, halfDepth, 0.f }, aColour });
+		vertices.Add({ { -halfWidth, -halfHeight, halfDepth }, aColour });
+		vertices.Add({ { halfWidth, -halfHeight, halfDepth }, aColour });
+		vertices.Add({ { halfWidth, halfHeight, halfDepth }, aColour });
+		vertices.Add({ { -halfWidth, halfHeight, halfDepth }, aColour });
 #pragma endregion
 
 #pragma region Indices
@@ -362,253 +314,69 @@ namespace Prism
 		}
 	}
 
-	void Model::DeActivateSurfaces()
+	void Model::ActivateAlbedo(eOwnerType aOwner)
 	{
 		for (int i = 0; i < mySurfaces.Size(); ++i)
 		{
-			mySurfaces[i]->DeActivate();
+			mySurfaces[i]->ActivateAlbedo(aOwner);
+		}
+
+		for (int i = 0; i < myChildren.Size(); ++i)
+		{
+			myChildren[i]->ActivateAlbedo(aOwner);
 		}
 	}
 
-	bool Model::SetGPUState(const CU::GrowingArray<CU::Matrix44<float>>& someWorldMatrices
-		, const CU::GrowingArray<CU::Vector3<float>>& someScales
-		, const CU::GrowingArray<float>& someHeights)
+	void Model::EvaluateEffectTechnique()
 	{
-		DL_ASSERT_EXP(mySurfaces.Size() < 2, "We do not support several surfaces yet");
-
-		if (myIsNULLObject == true)
+		int uvCount = 0;
+		bool hasVertexColor = false;
+		for (int i = 0; i < myVertexFormat.Size(); ++i)
 		{
-			//if (myChildren.Size() == 0)
+			std::string semanticName(myVertexFormat[i]->SemanticName);
+			if (semanticName == "TEXCOORD")
 			{
-				return false;
+				++uvCount;
 			}
-			//return myChildren[0]->SetGPUState(someWorldMatrices, someScales, someHeights);
+			if (semanticName == "COLOR")
+			{
+				hasVertexColor = true;
+			}
 		}
-		else
+
+		if (hasVertexColor == true)
 		{
-			DL_ASSERT_EXP(someWorldMatrices.Size() <= myMaxInstances, "Tried to instance too many instances");
-
-			if (someWorldMatrices.Size() > myMaxInstances)
+			if (uvCount == 2)
 			{
-				return false;
+				myTechniqueName = "Render_2UVSET_COLOR";
+
 			}
-
-			D3D11_MAPPED_SUBRESOURCE mappedResource;
-			ID3D11DeviceContext* context = Engine::GetInstance()->GetContex();
-
-			context->Map(myInstancingMatrixBuffer->myVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-			if (mappedResource.pData != nullptr)
+			else if (uvCount == 1)
 			{
-				CU::Matrix44<float>* data = (CU::Matrix44<float>*)mappedResource.pData;
-				if (someWorldMatrices.Size() > 0)
-				{
-					memcpy(data, &someWorldMatrices[0], sizeof(CU::Matrix44<float>) * someWorldMatrices.Size());
-				}
-
-				context->Unmap(myInstancingMatrixBuffer->myVertexBuffer, 0);
+				myTechniqueName = "Render_1UVSET_COLOR";
 			}
 			else
 			{
-				DL_ASSERT("Failed to Map InstancingMatrix Buffer");
-				return false;
+				DL_ASSERT("Model EvaluateTechnique: invalid uv-set-count with vertexcolor.");
 			}
-
-			context->Map(myInstancingScaleBuffer->myVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-			if (mappedResource.pData != nullptr)
+		}
+		else
+		{
+			if (uvCount == 2)
 			{
-				CU::Vector3<float>* data = (CU::Vector3<float>*)mappedResource.pData;
-				if (someScales.Size() > 0)
-				{
-					memcpy(data, &someScales[0], sizeof(CU::Vector3<float>) * someScales.Size());
-				}
+				myTechniqueName = "Render_2UVSET";
 
-				context->Unmap(myInstancingScaleBuffer->myVertexBuffer, 0);
+			}
+			else if (uvCount == 1)
+			{
+				myTechniqueName = "Render_1UVSET";
 			}
 			else
 			{
-				DL_ASSERT("Failed to Map InstancingScale Buffer");
-				return false;
+				DL_ASSERT("Model EvaluateTechnique: invalid uv-set-count without vertexcolor.");
 			}
-
-			context->Map(myInstancingHeightBuffer->myVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-			if (mappedResource.pData != nullptr)
-			{
-				float* data = (float*)mappedResource.pData;
-				if (someHeights.Size() > 0)
-				{
-					memcpy(data, &someHeights[0], sizeof(float) * someHeights.Size());
-				}
-
-				context->Unmap(myInstancingHeightBuffer->myVertexBuffer, 0);
-			}
-			else
-			{
-				DL_ASSERT("Failed to Map InstancingHeight Buffer");
-				return false;
-			}
-
-			myVertexBuffers[0] = myVertexBuffer->myVertexBuffer;
-			myVertexBuffers[1] = myInstancingMatrixBuffer->myVertexBuffer;
-			myVertexBuffers[2] = myInstancingScaleBuffer->myVertexBuffer;
-			myVertexBuffers[3] = myInstancingHeightBuffer->myVertexBuffer;
-
-			UINT strides[4] = { myVertexBuffer->myStride, myInstancingMatrixBuffer->myStride
-				, myInstancingScaleBuffer->myStride, myInstancingHeightBuffer->myStride };
-			UINT offsets[4] = { 0, 0, 0, 0 };
-			context->IASetVertexBuffers(0, 4, myVertexBuffers, strides, offsets);
-			context->IASetIndexBuffer(myIndexBuffer->myIndexBuffer
-				, myIndexBuffer->myIndexBufferFormat, myIndexBuffer->myByteOffset);
-			context->IASetInputLayout(myVertexLayout);
-
-			mySurfaces[0]->Activate();
-
-			return true;
 		}
-	}
 
-	int Model::GetIndexCount()
-	{
-		if (myIsNULLObject == true)
-		{
-			return myChildren[0]->GetIndexCount();
-		}
-		else
-		{
-			return mySurfaces[0]->GetIndexCount();
-		}
-	}
-
-	int Model::GetVertexStart()
-	{
-		if (myIsNULLObject == true)
-		{
-			return myChildren[0]->GetVertexStart();
-		}
-		else
-		{
-			return mySurfaces[0]->GetVertexStart();
-		}
-	}
-
-	CU::GrowingArray<Model*>& Model::GetChildren()
-	{
-		return myChildren;
-	}
-
-	const std::string& Model::GetTechniqueName() const
-	{
-		if (myIsNULLObject == true)
-		{
-			return myChildren[0]->GetTechniqueName();
-		}
-		else
-		{
-			return BaseModel::GetTechniqueName();
-		}
-	}
-
-	Model* Model::GetRealModel(const CU::Vector3<float>& aModelPosition, const CU::Vector3<float>& aCameraPosition)
-	{
-		if (myIsLodGroup == true)
-		{
-			float lengthBetweenCameraAndModel = CU::Length(aCameraPosition - aModelPosition);
-			int level = 0;
-
-			Model* toRender = nullptr;
-			for (int i = myChildren.Size() - 1; i >= 0; i--)
-			{
-				LodGroup* group = myLodGroup;
-				double threshold = group->myThreshHolds[i];
-				threshold /= 100;
-				if (threshold <= lengthBetweenCameraAndModel)
-				{
-					toRender = myChildren[i];
-					level = i;
-					break;
-				}
-			}
-
-			if (toRender)
-			{
-				return toRender->GetRealModel(aModelPosition, aCameraPosition);
-			}
-
-		}
-		return this;
-	}
-
-	void Model::InitInstancingBuffers()
-	{
-		ZeroMemory(myInstancingBufferDesc, sizeof(*myInstancingBufferDesc));
-		myInstancingBufferDesc->Usage = D3D11_USAGE_DYNAMIC;
-		myInstancingBufferDesc->BindFlags = D3D11_BIND_VERTEX_BUFFER;
-		myInstancingBufferDesc->CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		myInstancingBufferDesc->MiscFlags = 0;
-		myInstancingBufferDesc->StructureByteStride = 0;
-
-
-		myInstancingMatrixBuffer = new VertexBufferWrapper();
-		myInstancingMatrixBuffer->myStride = sizeof(CU::Matrix44<float>);
-		myInstancingMatrixBuffer->myByteOffset = 0;
-		myInstancingMatrixBuffer->myStartSlot = 0;
-		myInstancingMatrixBuffer->myNumberOfBuffers = 1;
-
-		myInstancingScaleBuffer = new VertexBufferWrapper();
-		myInstancingScaleBuffer->myStride = sizeof(CU::Vector3<float>);
-		myInstancingScaleBuffer->myByteOffset = 0;
-		myInstancingScaleBuffer->myStartSlot = 0;
-		myInstancingScaleBuffer->myNumberOfBuffers = 1;
-
-		myInstancingHeightBuffer = new VertexBufferWrapper();
-		myInstancingHeightBuffer->myStride = sizeof(float);
-		myInstancingHeightBuffer->myByteOffset = 0;
-		myInstancingHeightBuffer->myStartSlot = 0;
-		myInstancingHeightBuffer->myNumberOfBuffers = 1;
-	}
-
-	void Model::SetupInstancingBuffers()
-	{
-		if (myInstancingMatrixBuffer->myVertexBuffer != nullptr)
-			myInstancingMatrixBuffer->myVertexBuffer->Release();
-
-		myInstancingBufferDesc->ByteWidth = sizeof(CU::Matrix44<float>) * myMaxInstances;
-		HRESULT hr = Engine::GetInstance()->GetDevice()->CreateBuffer(myInstancingBufferDesc, nullptr
-			, &myInstancingMatrixBuffer->myVertexBuffer);
-		if (FAILED(hr) != S_OK)
-		{
-			DL_ASSERT("Model::SetupInstancingBuffer: Failed to setup myInstancingMatrixBuffer");
-		}
-		Engine::GetInstance()->SetDebugName(myInstancingMatrixBuffer->myVertexBuffer, "Model::myInstancingMatrixBuffer->myVertexBuffer");
-
-
-		if (myInstancingScaleBuffer->myVertexBuffer != nullptr)
-			myInstancingScaleBuffer->myVertexBuffer->Release();
-
-		myInstancingBufferDesc->ByteWidth = sizeof(CU::Vector3<float>) * myMaxInstances;
-		hr = Engine::GetInstance()->GetDevice()->CreateBuffer(myInstancingBufferDesc, nullptr
-			, &myInstancingScaleBuffer->myVertexBuffer);
-		if (FAILED(hr) != S_OK)
-		{
-			DL_ASSERT("Model::SetupInstancingBuffer: Failed to setup myInstancingScaleBuffer");
-		}
-		Engine::GetInstance()->SetDebugName(myInstancingScaleBuffer->myVertexBuffer, "Model::myInstancingScaleBuffer->myVertexBuffer");
-
-		if (myInstancingHeightBuffer->myVertexBuffer != nullptr)
-			myInstancingHeightBuffer->myVertexBuffer->Release();
-
-		myInstancingBufferDesc->ByteWidth = sizeof(float) * myMaxInstances;
-		hr = Engine::GetInstance()->GetDevice()->CreateBuffer(myInstancingBufferDesc, nullptr
-			, &myInstancingHeightBuffer->myVertexBuffer);
-		if (FAILED(hr) != S_OK)
-		{
-			DL_ASSERT("Model::SetupInstancingBuffer: Failed to setup myInstancingHeightBuffer");
-		}
-		Engine::GetInstance()->SetDebugName(myInstancingHeightBuffer->myVertexBuffer, "Model::myInstancingHeightBuffer->myVertexBuffer");
-	}
-
-	bool Model::IsNullObject()
-	{
-		return myIsNULLObject;
 	}
 
 }

@@ -1,0 +1,9 @@
+p:\GitHub\ModelViewer\Solution\CSharpUtilities\Workbed\Release\CSharpUtilities.dll.config
+p:\GitHub\ModelViewer\Solution\CSharpUtilities\Workbed\Release\CSharpUtilities.dll
+p:\GitHub\ModelViewer\Solution\CSharpUtilities\Workbed\Release\CSharpUtilities.pdb
+p:\GitHub\ModelViewer\Workbed\bin\CSharpUtilities.dll.config
+p:\GitHub\ModelViewer\Workbed\bin\CSharpUtilities.dll
+p:\GitHub\ModelViewer\Workbed\bin\CSharpUtilities.pdb
+p:\GitHub\ModelViewer\Solution\CSharpUtilities\CSharpUtilities\obj\Release\CSharpUtilities.csprojResolveAssemblyReference.cache
+p:\GitHub\ModelViewer\Solution\CSharpUtilities\CSharpUtilities\obj\Release\CSharpUtilities.dll
+p:\GitHub\ModelViewer\Solution\CSharpUtilities\CSharpUtilities\obj\Release\CSharpUtilities.pdb

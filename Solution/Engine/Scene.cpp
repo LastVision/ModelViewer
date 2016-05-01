@@ -1,229 +1,156 @@
 #include "stdafx.h"
 
-
+#include <AABB.h>
 #include "Camera.h"
-#include <Defines.h>
-#include <d3dx11effect.h>
+#include "Defines.h"
 #include "DirectionalLight.h"
 #include "EngineEnums.h"
-#include "Frustum.h"
 #include "Instance.h"
 #include "PointLight.h"
-#include "RoomManager.h"
 #include "Scene.h"
 #include "SpotLight.h"
-#include "InstancingHelper.h"
-#include "Texture.h"
-#include "Engine.h"
+#include "Terrain.h"
+#include <XMLReader.h>
 
-namespace Prism
+#ifdef SCENE_USE_OCTREE
+#include "Octree.h"
+#endif
+
+Prism::Scene::Scene(const Camera& aCamera, Terrain& aTerrain)
+	: myCamera(aCamera)
+	, myTerrain(aTerrain)
+#ifdef SCENE_USE_OCTREE
+	, myOctree(new Octree(6))
+#endif
 {
-	Scene::Scene()
-		: myCamera(nullptr)
-		, myArmInstance(nullptr)
-		, myWeaponInstance(nullptr)
-	{
-		myDirectionalLights.Init(4);
-		myPointLights.Init(128);
-		myAmbientPointLights.Init(128);
-		mySpotLights.Init(4);
-		mySpotLightsTextureProjection.Init(4);
+	myInstances.Init(4096);
+	myDynamicInstances.Init(64);
+	myDirectionalLights.Init(4);
+	myPointLights.Init(4);
+	mySpotLights.Init(4);
 
-		myInstancingHelper = new InstancingHelper();
-		myInstancingHelper->SetCamera(myCamera);
-		myRoomManager = new RoomManager();
+	memset(&myDirectionalLightData[0], 0, sizeof(DirectionalLightData) * NUMBER_OF_DIRECTIONAL_LIGHTS);
+	memset(&myPointLightData[0], 0, sizeof(PointLightData) * NUMBER_OF_POINT_LIGHTS);
+	memset(&mySpotLightData[0], 0, sizeof(SpotLightData) * NUMBER_OF_SPOT_LIGHTS);
+
+	
+}
+
+Prism::Scene::~Scene()
+{
+
+#ifdef SCENE_USE_OCTREE
+	delete myOctree;
+	myOctree = nullptr;
+
+#else
+	myInstances.DeleteAll();
+#endif
+}
+
+void Prism::Scene::Render(bool aRenderNavMeshLines)
+{
+	for (int i = 0; i < myDirectionalLights.Size(); ++i)
+	{
+		myDirectionalLights[i]->Update();
+
+		myDirectionalLightData[i].myDirection = myDirectionalLights[i]->GetCurrentDir();
+		myDirectionalLightData[i].myColor = myDirectionalLights[i]->GetColor();
 	}
 
-	Scene::~Scene()
+	for (int i = 0; i < myPointLights.Size(); ++i)
 	{
-		SAFE_DELETE(myInstancingHelper);
-		SAFE_DELETE(myRoomManager);
+		myPointLights[i]->Update();
+
+		myPointLightData[i].myColor = myPointLights[i]->GetColor();
+		myPointLightData[i].myPosition = myPointLights[i]->GetPosition();
+		myPointLightData[i].myRange = myPointLights[i]->GetRange();
 	}
 
-	void Scene::Render()
+	for (int i = 0; i < mySpotLights.Size(); ++i)
 	{
-		UpdateLights();
+		mySpotLights[i]->Update();
 
-		const CU::GrowingArray<Instance*>& instances = myRoomManager->GetActiveInstances(*myCamera);
-
-		for (int i = 0; i < instances.Size(); ++i)
-		{
-			instances[i]->Render(*myCamera, *myInstancingHelper);
-		}
-
-		myInstancingHelper->Render();
+		mySpotLightData[i].myPosition = mySpotLights[i]->GetPosition();
+		mySpotLightData[i].myDirection = mySpotLights[i]->GetDir();
+		mySpotLightData[i].myColor = mySpotLights[i]->GetColor();
+		mySpotLightData[i].myRange = mySpotLights[i]->GetRange();
+		mySpotLightData[i].myCone = mySpotLights[i]->GetCone();
 	}
 
-	void Scene::RenderArmAndWeapon()
+	myTerrain.GetEffect()->UpdateDirectionalLights(myDirectionalLightData);
+	//myTerrain.UpdatePointLights(myPointLightData);
+	//myTerrain.UpdateSpotLights(mySpotLightData);
+	myTerrain.Render(myCamera, aRenderNavMeshLines);
+
+#ifdef SCENE_USE_OCTREE
+	myOctree->Update();
+	myInstances.RemoveAll();
+	myOctree->GetOccupantsInAABB(myCamera.GetFrustum(), myInstances);
+
+	for (int i = 0; i < myDynamicInstances.Size(); ++i)
 	{
-		if (GC::ShouldRenderGUI == true)
-		{
-			if (myArmInstance != nullptr)
-			{
-				myArmInstance->Render(*myCamera);
-			}
-
-			if (myWeaponInstance != nullptr)
-			{
-				myWeaponInstance->Render(*myCamera);
-			}
-		}
+		myDynamicInstances[i]->UpdateDirectionalLights(myDirectionalLightData);
+		myDynamicInstances[i]->UpdatePointLights(myPointLightData);
+		myDynamicInstances[i]->UpdateSpotLights(mySpotLightData);
+		myDynamicInstances[i]->Render(myCamera);
 	}
-
-	void Scene::RenderArmAndWeaponOnlyDepth()
+#ifdef SHOW_OCTREE_DEBUG
+	Engine::GetInstance()->PrintText(myInstances.Size(), { 600.f, -600.f });
+#endif
+#endif
+	for (int i = 0; i < myInstances.Size(); ++i)
 	{
-		if (GC::ShouldRenderGUI == true)
-		{
-			if (myArmInstance != nullptr)
-			{
-				myArmInstance->Render(*myCamera, true);
-			}
-
-			if (myWeaponInstance != nullptr)
-			{
-				myWeaponInstance->Render(*myCamera, true);
-			}
-		}
+		myInstances[i]->UpdateDirectionalLights(myDirectionalLightData);
+		myInstances[i]->UpdatePointLights(myPointLightData);
+		myInstances[i]->UpdateSpotLights(mySpotLightData);
+		myInstances[i]->Render(myCamera);
 	}
+}
 
-	void Scene::RenderWithoutRoomManager()
+void Prism::Scene::AddInstance(Instance* aInstance)
+{
+#ifdef SCENE_USE_OCTREE
+	if (aInstance->GetOctreeType() == eOctreeType::DYNAMIC)
 	{
-		UpdateLights();
-
-		const CU::GrowingArray<Instance*>& instances = myRoomManager->GetAllInstances();
-
-		for (int i = 0; i < instances.Size(); ++i)
-		{
-			instances[i]->Render(*myCamera, *myInstancingHelper);
-		}
-
-		myInstancingHelper->Render();
-
-		if (GC::ShouldRenderGUI == true)
-		{
-			if (myArmInstance != nullptr)
-			{
-				myArmInstance->Render(*myCamera);
-			}
-
-			if (myWeaponInstance != nullptr)
-			{
-				myWeaponInstance->Render(*myCamera);
-			}
-		}
+		myDynamicInstances.Add(aInstance);
 	}
-
-	void Scene::AddRoom(Room* aRoom)
+	else
 	{
-		myRoomManager->Add(aRoom);
+		myOctree->Add(aInstance);
 	}
+#else
+	myInstances.Add(aInstance);
+#endif
+}
 
-	void Scene::AddInstance(Instance* aInstance, eObjectRoomType aRoomType)
+void Prism::Scene::AddLight(DirectionalLight* aLight)
+{
+	myDirectionalLights.Add(aLight);
+}
+
+void Prism::Scene::AddLight(PointLight* aLight)
+{
+	myPointLights.Add(aLight);
+}
+
+void Prism::Scene::AddLight(SpotLight* aLight)
+{
+	mySpotLights.Add(aLight);
+}
+
+void Prism::Scene::RemoveInstance(Instance* aInstance) 
+{
+#ifdef SCENE_USE_OCTREE
+	if (aInstance->GetOctreeType() == eOctreeType::DYNAMIC)
 	{
-		DL_ASSERT_EXP(myRoomManager != nullptr, "No Room manager");
-		myRoomManager->Add(aInstance, aRoomType);
+		myDynamicInstances.RemoveCyclic(aInstance);
 	}
-
-	void Scene::AddLight(DirectionalLight* aLight)
+	else
 	{
-		myDirectionalLights.Add(aLight);
+		myOctree->Remove(aInstance);
 	}
-
-	void Scene::AddLight(PointLight* aLight)
-	{
-		if (aLight->GetAmbientOnly() == false)
-		{
-			myPointLights.Add(aLight);
-			myRoomManager->Add(aLight);
-		}
-		else
-		{
-			myAmbientPointLights.Add(aLight);
-		}
-	}
-
-	void Scene::AddLight(SpotLight* aLight)
-	{
-		//mySpotLights.Add(aLight);
-		myRoomManager->Add(aLight);
-	}
-
-	void Scene::AddLight(SpotLightTextureProjection* aLight)
-	{
-		myRoomManager->Add(aLight);
-	}
-
-	void Scene::SetCamera(const Camera& aCamera)
-	{
-		myCamera = &aCamera;
-		myInstancingHelper->SetCamera(myCamera);
-	}
-
-	void Scene::UpdateLights()
-	{
-		//for (int i = 0; i < myDirectionalLights.Size(); ++i)
-		//{
-		//	myDirectionalLights[i]->Update();
-		//}
-		//
-		//for (int i = 0; i < myAmbientPointLights.Size(); ++i)
-		//{
-		//	myAmbientPointLights[i]->Update();
-		//}
-		//
-		//for (int i = 0; i < mySpotLights.Size(); ++i)
-		//{
-		//	mySpotLights[i]->Update();
-		//}
-	}
-
-	void Scene::RemoveInstance(Instance* aInstance)
-	{
-		if (myRoomManager != nullptr)
-		{
-			myRoomManager->Remove(aInstance);
-		}
-	}
-
-	const CU::GrowingArray<PointLight*>& Scene::GetPointLights(bool aUseRoomManager) const
-	{
-		//return myPointLights;
-		//return myActivePointLights;
-		if (aUseRoomManager == true)
-		{
-			return myRoomManager->GetActivePointLights();
-		}
-
-		return myAmbientPointLights;
-	}
-
-	const CU::GrowingArray<SpotLight*>& Scene::GetSpotLights(bool aUseRoomManager) const
-	{
-		if (aUseRoomManager == true)
-		{
-			return myRoomManager->GetActiveSpotLights();
-		}
-
-		return mySpotLights;
-	}
-
-	const CU::GrowingArray<SpotLightTextureProjection*>& Scene::GetSpotLightsTextureProjection(bool aUseRoomManager) const
-	{
-		if (aUseRoomManager == true)
-		{
-			return myRoomManager->GetActiveSpotLightsTextureProjection();
-		}
-
-		return mySpotLightsTextureProjection;
-	}
-
-	void Scene::SetArmInstance(Instance* aInstance)
-	{
-		myArmInstance = aInstance;
-	}
-
-	void Scene::SetWeaponInstance(Instance* aInstance)
-	{
-		myWeaponInstance = aInstance;
-	}
+#else
+	myInstances.RemoveCyclic(aInstance);
+#endif
 }

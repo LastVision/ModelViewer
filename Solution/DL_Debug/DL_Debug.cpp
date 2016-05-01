@@ -53,7 +53,6 @@ DL_Debug::Debug::~Debug()
 
 bool DL_Debug::Debug::Create(std::string aFile)
 {
-#ifndef RELEASE_BUILD
 	assert(ourInstance == nullptr && "Debugobject already created");
 	ourInstance = new Debug();
 
@@ -64,40 +63,30 @@ bool DL_Debug::Debug::Create(std::string aFile)
 
 	strftime(buf, sizeof(buf), "%Y-%m-%d_%H_%M_%S", &tstruct);
 
-	std::string logFolder = "log\\";
-#ifdef RELEASE_BUILD
-#ifndef DLL_EXPORT
-	char documents[MAX_PATH];
-	HRESULT hResult = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, documents);
-	std::stringstream documentPath;
-	documentPath << documents;
-	logFolder = documentPath.str() + "\\Distortion Games\\Machina";
-	CreateDirectory(logFolder.c_str(), NULL);
-	logFolder += "\\log\\";
-	CreateDirectory(logFolder.c_str(), NULL);
-#else
+//#ifdef RELEASE_BUILD
+//	char documents[MAX_PATH];
+//	HRESULT hResult = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, SHGFP_TYPE_CURRENT, documents);
+//	std::stringstream documentPath;
+//	documentPath << documents;
+//	std::string logFolder = documentPath.str() + "\\Distortion Games\\Raven";
+//	CreateDirectory(logFolder.c_str(), NULL);
+//	logFolder += "\\log";
+//	CreateDirectory(logFolder.c_str(), NULL);
+//#else
 	CreateDirectory("log", NULL);
-#endif
-#else
-	CreateDirectory("log", NULL);
-#endif
+//#endif
 	std::stringstream ss;
-	ss << logFolder << buf << "_" << aFile;
+	ss << "log\\" << buf << "_" << aFile;
 	ourInstance->myDebugFile.open(ss.str().c_str());
 	if (ourInstance == nullptr)
 	{
 		return(false);
 	}
 	return(true);
-#else
-	aFile;
-	return true;
-#endif
 }
 
 bool DL_Debug::Debug::Destroy()
 {
-#ifndef RELEASE_BUILD
 	//if (ourInstance->myDebugFile.close() == false)
 	//{
 	//	return(false);
@@ -108,9 +97,6 @@ bool DL_Debug::Debug::Destroy()
 	delete ourInstance;
 	ourInstance = nullptr;
 	return(true);
-#else
-	return true;
-#endif
 }
 
 DL_Debug::Debug* DL_Debug::Debug::GetInstance()
@@ -224,7 +210,6 @@ void DL_Debug::Debug::AssertMessage(const char *aFileName, int aLine, const char
 	mbstowcs_s(&tempSize, wc, cSize, ss.str().c_str(), cSize);
 
 	//_wassert(wc, 0, aLine);
-
 	_wassert(wc, _CRT_WIDE(__FILE__), __LINE__);
 	delete[] wc;
 }

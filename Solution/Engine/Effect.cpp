@@ -15,36 +15,9 @@ namespace Prism
 {
 	
 	Effect::Effect()
-		: myTechnique(nullptr)
-		, myCameraPosition(nullptr)
-		, myProjectionMatrix(nullptr)
-		, myViewMatrix(nullptr)
-		, myWorldMatrix(nullptr)
-		, myViewProjectionMatrix(nullptr)
-		, myShadowMVP(nullptr)
-		, myEyePosition(nullptr)
-		, myTotalTime(nullptr)
-		, myPlayerVariable(nullptr)
-		, myColor(nullptr)
-		, myScaleVector(nullptr)
-		, myAmbientHue(nullptr)
-		, myDirectionalLight(nullptr)
-		, myPointLight(nullptr)
-		, mySpotLight(nullptr)
-		, myTexture(nullptr)
-		, myFogOfWarTexture(nullptr)
-		, myShadowDepthTexture(nullptr)
-		, mySpritePosAndScale(nullptr)
-		, mySpriteOrientation(nullptr)
-		, myStreakDiffuse(nullptr)
-		, myStreakSizeDelta(nullptr)
-		, myStreakStartAlpha(nullptr)
-		, myStreakAlphaDelta(nullptr)
-		, myBonesArray(nullptr)
-		, myFileName("not initilized")
-		, myEffectListeners(512)
-		, myEffect(nullptr)
 	{
+		myEffectListeners.Init(512);
+		myEffect = nullptr;
 	}
 
 	Effect::~Effect()
@@ -54,6 +27,12 @@ namespace Prism
 
 	bool Effect::Init(const std::string& aEffectFile)
 	{
+		//if (myEffect != nullptr)
+		//{
+		//	myEffect->Release();
+		//	myEffect = nullptr;
+		//}
+
 		if (ReloadShader(aEffectFile) == false)
 		{
 			return false;
@@ -65,6 +44,7 @@ namespace Prism
 		}
 
 		return true;
+
 	}
 
 	ID3DX11EffectTechnique* Effect::GetTechnique(const std::string& aName)
@@ -104,7 +84,7 @@ namespace Prism
 
 	void Effect::SetTexture(Texture* aTexture)
 	{
-		myTexture->SetResource(aTexture ? aTexture->GetShaderView() : nullptr);
+		myTexture->SetResource(aTexture->GetShaderView());
 	}
 
 	void Effect::SetAmbientHue(CU::Vector4f aVector)
@@ -118,31 +98,6 @@ namespace Prism
 	void Effect::SetBones(const CU::StaticArray<CU::Matrix44<float>, MAX_NR_OF_BONES>& someBones)
 	{
 		myBonesArray->SetMatrixArray(&someBones[0].myMatrix[0], 0, MAX_NR_OF_BONES);
-	}
-
-	void Effect::SetFogOfWarTexture(Texture* aFogOfWarTexture)
-	{
-		myFogOfWarTexture->SetResource(aFogOfWarTexture ? aFogOfWarTexture->GetShaderView() : nullptr);
-	}
-
-	void Effect::SetShadowDepthTexture(Texture* aLightDepthTexture)
-	{
-		myShadowDepthTexture->SetResource(aLightDepthTexture->GetDepthStencilShaderView());
-	}
-
-	void Effect::SetShadowMVP(const CU::Matrix44<float>& aMatrix)
-	{
-		myShadowMVP->SetMatrix(&aMatrix.myMatrix[0]);
-	}
-
-	void Effect::SetGradiantValue(float aValue)
-	{
-		myGradiantValue->SetFloat(aValue);
-	}
-
-	void Effect::SetGradiantDirection(const CU::Vector2<float>& aDirection)
-	{
-		myGradiantDirection->SetFloatVector(&aDirection.x);
 	}
 
 	void Effect::SetPosAndScale(const CU::Vector2<float>& aPos
@@ -237,7 +192,6 @@ namespace Prism
 
 	bool Effect::ReloadShader(const std::string& aFile)
 	{
-		Sleep(10);
 		myFileName = aFile;
 
 		HRESULT hr;
@@ -291,6 +245,14 @@ namespace Prism
 		{
 			compiledShader->Release();
 		}
+
+
+		//myTechnique = myEffect->GetTechniqueByName("Render");
+		//if (myTechnique->IsValid() == false)
+		//{
+		//	DL_MESSAGE_BOX("Failed to get Technique", "Effect Error", MB_ICONWARNING);
+		//	return false;
+		//}
 
 		myScaleVector = myEffect->GetVariableByName("Scale")->AsVector();
 		if (myScaleVector->IsValid() == false)
@@ -363,24 +325,6 @@ namespace Prism
 			myTexture = nullptr;
 		}
 
-		myFogOfWarTexture = myEffect->GetVariableByName("FogOfWarTexture")->AsShaderResource();
-		if (myFogOfWarTexture->IsValid() == false)
-		{
-			myFogOfWarTexture = nullptr;
-		}
-
-		myShadowDepthTexture = myEffect->GetVariableByName("ShadowDepth")->AsShaderResource();
-		if (myShadowDepthTexture->IsValid() == false)
-		{
-			myShadowDepthTexture = nullptr;
-		}
-
-		myShadowMVP = myEffect->GetVariableByName("ShadowMVP")->AsMatrix();
-		if (myShadowMVP->IsValid() == false)
-		{
-			myShadowMVP = nullptr;
-		}
-
 		mySpritePosAndScale = myEffect->GetVariableByName("SpritePositionAndScale")->AsVector();
 		if (mySpritePosAndScale->IsValid() == false)
 		{
@@ -439,18 +383,6 @@ namespace Prism
 		if (myBonesArray->IsValid() == false)
 		{
 			myBonesArray = nullptr;
-		}
-
-		myGradiantValue = myEffect->GetVariableByName("GradiantValue")->AsScalar();
-		if (myGradiantValue->IsValid() == false)
-		{
-			myGradiantValue = nullptr;
-		}
-
-		myGradiantDirection = myEffect->GetVariableByName("GradiantDirection")->AsVector();
-		if (myGradiantDirection->IsValid() == false)
-		{
-			myGradiantDirection = nullptr;
 		}
 
 		return true;

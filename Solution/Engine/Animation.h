@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Defines.h>
+#include "Defines.h"
 #include "HierarchyBone.h"
 #include <StaticArray.h>
 
@@ -25,8 +25,6 @@ namespace Prism
 
 		float GetAnimationLenght() const;
 		void SetAnimationLenght(float aLenght);
-
-		void GetHiearchyToBone(const std::string& aBoneName, GUIBone& aBoneOut);
 
 	private:
 		void SetBoneData(HierarchyBone& aBone);

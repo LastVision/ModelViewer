@@ -6,12 +6,9 @@
 
 struct ID3D11RenderTargetView;
 struct ID3D11DepthStencilView;
-struct D3D11_VIEWPORT;
 namespace Prism
 {
 	class FullScreenHelper;
-	class Scene;
-	class SpotLightShadow;
 	class Texture;
 
 	struct SceneData;
@@ -22,14 +19,10 @@ namespace Prism
 		Renderer();
 		~Renderer();
 
-		void ProcessShadow(SpotLightShadow* aShadowSpotLight, Scene* aScene);
-
 		void BeginScene();
 		void EndScene(int aEffect);
 
 		void FinalRender();
-
-		void Render(Texture* aSource, Texture* aEmissiveTexture, Texture* aDepthStencilTexture, int aEffect);
 
 		void OnResize(float aWidth, float aHeight);
 
@@ -52,8 +45,6 @@ namespace Prism
 
 		Texture* myFinalTexture;
 		Texture* myCombineMiddleMan;
-
-		D3D11_VIEWPORT* myShadowViewport;
 	};
 
 	inline Texture* Renderer::GetWorldTexture()

@@ -2,8 +2,6 @@
 #include "Camera2D.h"
 
 Camera2D::Camera2D()
-	: myResolutionPtr(nullptr)
-	, myResolutionScale(1.f)
 {
 	myShaking = false;
 	myShakeDuration = 0;

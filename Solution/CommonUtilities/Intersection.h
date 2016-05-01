@@ -21,12 +21,10 @@ namespace CU
 		bool CircleVsRect(Vector2<float> aCenter, float aRadius, Vector2<float> aRectTopLeft, Vector2<float> aRectBottomRight);
 
 		//3D
-		bool AABBvsAABB(const AABB& anAABB1, const AABB& anAABB2);
 		bool AABBvsAABB(const Vector3<float>& aMin1, const Vector3<float>& aMax1, const Vector3<float>& aMin2, const Vector3<float>& aMax2);
 		bool PointInsideSphere(Sphere aSphere, CU::Vector3<float> aPoint);
 		bool SphereVsSphere(Sphere aSphere, Sphere aOtherSphere);
-		bool PointInsideAABB(const AABB& aAABB, const CU::Vector3<float>& aPoint);
-		bool SphereInsideAABB(const AABB& aAABB, const CU::Vector3<float>& aPoint, float aRadius);
+		bool PointInsideAABB(AABB aAABB, CU::Vector3<float> aPoint);
 		bool LineVsSphere(LineSegment3D aLineSegment3D, Sphere aSphere, CU::Vector3<float>& aIntersectionPoint);
 		int PlaneVsSphere(CU::Plane<float> aPlane, Sphere aSphere);
 		bool SwepthSphereVsSphere(LineSegment3D aLineSegment3D, float aRadius, Sphere aSphere);
@@ -233,11 +231,6 @@ namespace CU
 		return true;
 	}
 
-	inline bool Intersection::AABBvsAABB(const AABB& anAABB1, const AABB& anAABB2)
-	{
-		return AABBvsAABB(anAABB1.myMinPos, anAABB1.myMaxPos, anAABB2.myMinPos, anAABB2.myMaxPos);
-	}
-
 	inline bool Intersection::AABBvsAABB(const Vector3<float>& aMin1, const Vector3<float>& aMax1, const Vector3<float>& aMin2, const Vector3<float>& aMax2)
 	{
 		if (aMax1.x < aMin2.x) return false;
@@ -261,7 +254,7 @@ namespace CU
 
 	inline bool Intersection::SphereVsSphere(Sphere aSphere, Sphere aOtherSphere)
 	{
-		if (CU::Length2(aOtherSphere.myCenterPosition - aSphere.myCenterPosition)
+		if (CU::Length2(aOtherSphere.myCenterPosition - aSphere.myCenterPosition) 
 			< (aSphere.myRadius + aOtherSphere.myRadius) * (aSphere.myRadius + aOtherSphere.myRadius))
 		{
 			return true;
@@ -269,7 +262,7 @@ namespace CU
 		return false;
 	}
 
-	inline bool Intersection::PointInsideAABB(const AABB& aAABB, const CU::Vector3<float>& aPoint)
+	inline bool Intersection::PointInsideAABB(AABB aAABB, CU::Vector3<float> aPoint)
 	{
 		if (aPoint.x > aAABB.myMaxPos.x) return false;
 		if (aPoint.x < aAABB.myMinPos.x) return false;
@@ -277,18 +270,6 @@ namespace CU
 		if (aPoint.y < aAABB.myMinPos.y) return false;
 		if (aPoint.z > aAABB.myMaxPos.z) return false;
 		if (aPoint.z < aAABB.myMinPos.z) return false;
-
-		return true;
-	}
-
-	inline bool Intersection::SphereInsideAABB(const AABB& aAABB, const CU::Vector3<float>& aPoint, float aRadius)
-	{
-		if (aPoint.x > aAABB.myMaxPos.x + aRadius) return false;
-		if (aPoint.x < aAABB.myMinPos.x - aRadius) return false;
-		if (aPoint.y > aAABB.myMaxPos.y + aRadius) return false;
-		if (aPoint.y < aAABB.myMinPos.y - aRadius) return false;
-		if (aPoint.z > aAABB.myMaxPos.z + aRadius) return false;
-		if (aPoint.z < aAABB.myMinPos.z - aRadius) return false;
 
 		return true;
 	}
@@ -519,7 +500,7 @@ namespace CU
 	}
 
 	inline double Intersection::perpDot(const CU::Vector2<float>& a, const CU::Vector2<float>& b)
-	{
-		return (a.y*b.x) - (a.x*b.y);
-	}
+		{
+			return (a.y*b.x) - (a.x*b.y);
+		}
 }

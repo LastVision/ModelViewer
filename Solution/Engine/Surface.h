@@ -33,8 +33,9 @@ namespace Prism{
 		bool SetTexture(const std::string& aResourceName, const std::string& aFileName, bool aUseSRGB);
 		bool SetTexture(const std::string& aResourceName, ID3D11ShaderResourceView* aResource);
 
+		void ActivateAlbedo(eOwnerType aOwner);
+
 		void Activate();
-		void DeActivate();
 		void ReloadSurface();
 
 		bool GetEmissive() const;
@@ -43,8 +44,8 @@ namespace Prism{
 		bool VerifyTextures(const std::string& aModelPath);
 
 	private:
-		CU::GrowingArray<ID3D11ShaderResourceView*> myResourceViews;
-		CU::GrowingArray<ID3DX11EffectShaderResourceVariable*> myShaderVariables;
+		CU::GrowingArray<Texture*> myTextures;
+		CU::GrowingArray<ID3DX11EffectShaderResourceVariable*> myShaderResourceViews;
 		CU::GrowingArray<std::string> myShaderResourceNames;
 		CU::GrowingArray<std::string> myFilePaths;
 
@@ -99,6 +100,11 @@ inline int Prism::Surface::GetIndexCount() const
 inline void Prism::Surface::SetIndexCount(const int aCount)
 {
 	myIndexCount = aCount;
+}
+
+inline void Prism::Surface::SetEffect(Effect* aEffect)
+{
+	myEffect = aEffect;
 }
 
 inline void Prism::Surface::SetPrimitiveTopology(const D3D11_PRIMITIVE_TOPOLOGY aTopology)

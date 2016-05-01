@@ -17,8 +17,6 @@ Prism::Sprite::Sprite(const std::string& aFileName, const CU::Vector2<float>& aS
 	, myHotspot(aHotSpot)
 	, myTexture(nullptr)
 	, myShaderView(nullptr)
-	, myTopLeftUV(0.f, 0.f)
-	, myRightBottomUV(1.f, 1.f)
 {
 	myFileName = aFileName;
 
@@ -39,7 +37,7 @@ Prism::Sprite::Sprite(const std::string& aFileName, const CU::Vector2<float>& aS
 	InitSurface("DiffuseTexture", myFileName);
 	InitBlendState("Sprite::BlendState");
 
-	ZeroMemory(myInitData, sizeof(*myInitData));
+	ZeroMemory(myInitData, sizeof(myInitData));
 
 	CreateVertices();
 }
@@ -50,8 +48,6 @@ Prism::Sprite::Sprite(ID3D11Texture2D* aTexture, const CU::Vector2<float>& aSpri
 	, myHotspot(aHotSpot)
 	, myTexture(nullptr)
 	, myShaderView(nullptr)
-	, myTopLeftUV(0.f, 0.f)
-	, myRightBottomUV(1.f, 1.f)
 {
 	myFileName = "Inited from ID3D11Texture";
 
@@ -91,7 +87,7 @@ Prism::Sprite::Sprite(ID3D11Texture2D* aTexture, const CU::Vector2<float>& aSpri
 	InitIndexBuffer();
 	InitBlendState("Sprite::BlendState");
 
-	ZeroMemory(myInitData, sizeof(*myInitData));
+	ZeroMemory(myInitData, sizeof(myInitData));
 
 	CreateVertices();
 }
@@ -99,9 +95,10 @@ Prism::Sprite::Sprite(ID3D11Texture2D* aTexture, const CU::Vector2<float>& aSpri
 void Prism::Sprite::Render(const CU::Vector2<float>& aPosition, const CU::Vector2<float>& aScale
 	, const CU::Vector4<float>& aColor)
 {
-	Engine::GetInstance()->SetDepthBufferState(eDepthStencil::Z_DISABLED);
+	Engine::GetInstance()->DisableZBuffer();
 
 	myPosition = aPosition;
+	//myOrientation.SetPos(aPosition);
 	myScale = aScale;
 
 	float blendFactor[4];
@@ -110,6 +107,7 @@ void Prism::Sprite::Render(const CU::Vector2<float>& aPosition, const CU::Vector
 	blendFactor[2] = 0.f;
 	blendFactor[3] = 0.f;
 
+	//myEffect->SetBlendState(myBlendState, blendFactor);
 	myEffect->SetProjectionMatrix(Engine::GetInstance()->GetOrthogonalMatrix());
 	myEffect->SetPosAndScale(aPosition, aScale);
 	myEffect->SetColor(aColor);
@@ -117,7 +115,7 @@ void Prism::Sprite::Render(const CU::Vector2<float>& aPosition, const CU::Vector
 
 	BaseModel::Render();
 
-	Engine::GetInstance()->SetDepthBufferState(eDepthStencil::Z_ENABLED);
+	Engine::GetInstance()->EnableZBuffer();
 }
 
 void Prism::Sprite::CreateVertices()
@@ -132,19 +130,19 @@ void Prism::Sprite::CreateVertices()
 
 	VertexPosUV vert;
 	vert.myPos = { left, top, 0.0f };
-	vert.myUV = { myTopLeftUV.x, myTopLeftUV.y };
+	vert.myUV = { 0.0f, 0.0f };
 	vertices.Add(vert);
 
 	vert.myPos = { right, bottom, 0.0f };
-	vert.myUV = { myRightBottomUV.x, myRightBottomUV.y };
+	vert.myUV = { 1.0f, 1.0f };
 	vertices.Add(vert);
 
 	vert.myPos = { left, bottom, 0.0f };
-	vert.myUV = { myTopLeftUV.x, myRightBottomUV.y };
+	vert.myUV = { 0.0f, 1.0f };
 	vertices.Add(vert);
 
 	vert.myPos = { right, top, 0.0f };
-	vert.myUV = { myRightBottomUV.x, myTopLeftUV.y };
+	vert.myUV = { 1.0f, 0.0f };
 	vertices.Add(vert);
 
 

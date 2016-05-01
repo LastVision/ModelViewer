@@ -7,20 +7,20 @@
 
 CU::TimerManager* CU::TimerManager::myInstance = nullptr;
 
-//void CU::TimerManager::Create()
-//{
-//	myInstance = new TimerManager();
-//}
+void CU::TimerManager::Create()
+{
+	myInstance = new TimerManager();
+}
 
-//void CU::TimerManager::Destroy()
-//{
-//	delete myInstance;
-//}
+void CU::TimerManager::Destroy()
+{
+	delete myInstance;
+}
 
-//CU::TimerManager* CU::TimerManager::GetInstance()
-//{
-//	return myInstance;
-//}
+CU::TimerManager* CU::TimerManager::GetInstance()
+{
+	return myInstance;
+}
 
 CU::TimerManager::TimerManager()
 {
@@ -33,13 +33,12 @@ CU::TimerManager::TimerManager()
 }
 
 
-//CU::TimerManager::~TimerManager()
-//{
-//}
+CU::TimerManager::~TimerManager()
+{
+}
 
 void CU::TimerManager::Update()
 {
-
 	TimeUnit time = GetTime();
 
 	myMasterTimer.AddTime(time);
@@ -128,9 +127,5 @@ void CU::TimerManager::CapFrameRate(float aFrameRate)
 		float frameTime = float(GetTime());
 		frameTime /= 1000000.f;
 		waitTime = frameTime;
-		if (waitTime + 0.002f < capTime)
-		{
-			//Yield(1);
-		}
 	}
 }

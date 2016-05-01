@@ -5,14 +5,13 @@
 #include "EffectContainer.h"
 #include "Engine.h"
 #include "FBXFactory.h"
+#include "FileWatcher.h"
 #include "Font.h"
-#include "FontProxy.h"
 #include "Model.h"
 #include "ModelLoader.h"
 #include "ModelProxy.h"
 #include "Sprite.h"
 #include "Text.h"
-#include "TextProxy.h"
 #include <TimerManager.h>
 #include "TextureContainer.h"
 #include <Vector.h>
@@ -30,7 +29,6 @@ namespace Prism
 		, myDebugTexts(16)
 		, myTextsNew(256)
 		, myShowDebugText(false)
-		, myShouldRenderText(true)
 	{
 		myModelFactory = new FBXFactory();
 		myWireframeIsOn = false;
@@ -47,14 +45,14 @@ namespace Prism
 		SAFE_DELETE(myFadeData.mySprite);
 		SAFE_DELETE(myModelFactory);
 
+		SAFE_DELETE(myText);
+		SAFE_DELETE(myDebugText);
 		SAFE_DELETE(myDialogueFont);
 		SAFE_DELETE(myConsoleFont);
 
-		SAFE_DELETE(myText);
-		SAFE_DELETE(myDebugText);
-
 		TextureContainer::Destroy();
 		EffectContainer::Destroy();
+		FileWatcher::Destroy();
 		AnimationSystem::Destroy();
 
 		ModelLoader::GetInstance()->ClearLoadJobs();
@@ -71,21 +69,15 @@ namespace Prism
 	{
 		myInstance = new Engine();
 		myInstance->mySetupInfo = &aSetupInfo;
-		
+
 		bool result = myInstance->Init(aHwnd, aWndProc);
-#ifndef RELEASE_BUILD
+
 		if (aSetupInfo.myWindowed == false)
 		{
 			myInstance->myDirectX->SetFullscreen(true);
 		}
-#else
-		myInstance->myDirectX->SetFullscreen(true);
-#endif
-
-
 
 		myInstance->Render();
-
 		return result;
 	}
 
@@ -99,38 +91,17 @@ namespace Prism
 		return myInstance;
 	}
 
-	void Engine::Update(float aDeltaTime)
-	{
-		if (myFadeData.myIsFading == true)
-		{
-			myFadeData.myCurrentTime -= aDeltaTime;
-
-			if (myFadeData.myCurrentTime <= 0.f)
-			{
-				myFadeData.myIsFading = false;
-				myFadeData.myCurrentTime = 0.f;
-			}
-		}
-	}
-
 	void Engine::Render()
 	{
-		RestoreDepthStencil();
-		DEBUG_PRINT(GET_RUNTIME);
-		DEBUG_PRINT(GetWindowSize());
-
-		if (myShouldRenderText == true)
+		for (int i = 0; i < myTexts.Size(); ++i)
 		{
-			for (int i = 0; i < myTexts.Size(); ++i)
+			if (myIsLoading == false)
 			{
-				if (myIsLoading == false)
-				{
-					myText->SetText(myTexts[i].myText);
-					myText->SetPosition(myTexts[i].myPosition);
-					myText->SetScale({ myTexts[i].myScale, myTexts[i].myScale });
-					myText->SetColor(myTexts[i].myColor);
-					myText->Render();
-				}
+				myText->SetText(myTexts[i].myText);
+				myText->SetPosition(myTexts[i].myPosition);
+				myText->SetScale({ myTexts[i].myScale, myTexts[i].myScale });
+				myText->SetColor(myTexts[i].myColor);
+				myText->Render();
 			}
 		}
 		myTexts.RemoveAll();
@@ -156,10 +127,18 @@ namespace Prism
 
 		if (myFadeData.myIsFading == true)
 		{
+			myFadeData.myCurrentTime -= CU::TimerManager::GetInstance()->GetMasterTimer().GetTime().GetFrameTime();
+
+			if (myFadeData.myCurrentTime <= 0.f)
+			{
+				myFadeData.myIsFading = false;
+				myFadeData.myCurrentTime = 0.f;
+			}
+
 			myFadeData.mySprite->Render({ 0.f, 0.f }, { 1.f, 1.f }, { 1.f, 1.f, 1.f, 1.f * myFadeData.myCurrentTime / myFadeData.myTotalTime });
 		}
 
-		myDirectX->Present(1, 0);
+		myDirectX->Present(0, 0);
 
 		if (myFadeData.myIsFading == false)
 		{
@@ -180,7 +159,6 @@ namespace Prism
 
 	void Engine::OnResize(int aWidth, int aHeigth)
 	{
-		SET_RUNTIME(false);
 		myWindowSizeInt.x = aWidth;
 		myWindowSizeInt.y = aHeigth;
 		myWindowSize.x = static_cast<float>(myWindowSizeInt.x);
@@ -199,7 +177,6 @@ namespace Prism
 			myFadeData.mySprite->ResizeTexture(myDirectX->GetBackbufferTexture());
 			myFadeData.mySprite->SetSize(myWindowSize, { 0.f, 0.f });
 		}
-		RESET_RUNTIME;
 	}
 
 	bool Engine::IsFullscreen() const
@@ -215,9 +192,14 @@ namespace Prism
 
 	Model* Engine::DLLLoadModel(const std::string& aModelPath, Effect* aEffect)
 	{
-		Model* model = myModelFactory->LoadModel(aModelPath.c_str());
-		model->SetEffect(aEffect);
-		model->Init(1);
+		CU::TimerManager::GetInstance()->StartTimer("LoadModel");
+
+		Model* model = myModelFactory->LoadModel(aModelPath.c_str(), aEffect);
+		model->Init();
+
+		int elapsed = static_cast<int>(
+			CU::TimerManager::GetInstance()->StopTimer("LoadModel").GetMilliseconds());
+		RESOURCE_LOG("Model \"%s\" took %d ms to load", aModelPath.c_str(), elapsed);
 
 		return model;
 	}
@@ -241,9 +223,9 @@ namespace Prism
 		return myDirectX->GetDepthStencil();
 	}
 
-	ID3D11RenderTargetView* Engine::GetBackbuffer()
+	ID3D11RenderTargetView* Engine::GetDepthBuffer()
 	{
-		return myDirectX->GetBackbuffer();
+		return myDirectX->GetDepthBuffer();
 	}
 
 	ID3D11ShaderResourceView* Engine::GetBackbufferView()
@@ -256,17 +238,7 @@ namespace Prism
 		return myDirectX->GetDepthbufferTexture();
 	}
 
-	void Engine::SetDepthStencil(ID3D11DepthStencilView* aStencil)
-	{
-		myDirectX->SetDepthStencil(aStencil);
-	}
-
-	void Engine::RestoreDepthStencil()
-	{
-		myDirectX->RestoreDepthStencil();
-	}
-
-	FontProxy* Engine::GetFont(eFont aFont)
+	Font* Engine::GetFont(eFont aFont)
 	{
 		switch (aFont)
 		{
@@ -301,7 +273,6 @@ namespace Prism
 			ENGINE_LOG("Failed to Create Window");
 			return false;
 		}
-
 		myDirectX = new DirectX(aHwnd, *mySetupInfo);
 		if (myDirectX == nullptr)
 		{
@@ -309,10 +280,6 @@ namespace Prism
 			return false;
 		}
 
-		myModelLoaderThread = new std::thread(&ModelLoader::Run, ModelLoader::GetInstance());
-		myModelLoaderThreadID = myModelLoaderThread->get_id();
-
-		DebugDrawer::GetInstance();
 		myFadeData.mySprite = new Sprite(myDirectX->GetBackbufferTexture(), { float(myWindowSize.x), float(myWindowSize.y) }, { 0.f, 0.f });
 
 		ShowWindow(aHwnd, 10);
@@ -321,21 +288,17 @@ namespace Prism
 		myOrthogonalMatrix = CU::Matrix44<float>::CreateOrthogonalMatrixLH(static_cast<float>(myWindowSize.x)
 			, static_cast<float>(myWindowSize.y), 0.1f, 1000.f);
 
-
-		myDialogueFont = ModelLoader::GetInstance()->LoadFont("Data/Resource/Font/debugText.txt", { 256, 256 });
-		myConsoleFont = ModelLoader::GetInstance()->LoadFont("Data/Resource/Font/consolab.ttf_sdf.txt", { 256, 256 });
-
-		//myDialogueFont = new Font("Data/Resource/Font/debugText.txt", { 256, 256 });
-		//myConsoleFont = new Font("Data/Resource/Font/consolab.ttf_sdf.txt", { 256, 256 });
-		//myText = new Text(*myDialogueFont);
-
-		myText = ModelLoader::GetInstance()->LoadText(myDialogueFont);
+		//myFont = new Font("Data/Resource/Font/arial.ttf_sdf_512.txt", { 512, 512 });
+		myDialogueFont = new Font("Data/Resource/Font/debugText.txt", { 256, 256 });
+		myConsoleFont = new Font("Data/Resource/Font/consolab.ttf_sdf.txt", { 256, 256 });
+		//myFont = new Font("Data/Resource/Font/consolab.ttf_sdf_512.txt", { 512, 512 });
+		//myFont = new Font("Data/Resource/Font/consola.ttf_sdf_512.txt", { 512, 512 });
+		myText = new Text(*myDialogueFont);
 		myText->SetPosition({ 800.f, -300.f });
 		myText->SetText("едц");
 		myText->SetScale({ 1.f, 1.f });
 
-		//myDebugText = new Text(*myDialogueFont);
-		myDebugText = ModelLoader::GetInstance()->LoadText(myDialogueFont);
+		myDebugText = new Text(*myDialogueFont);
 		myDebugText->SetPosition({ 800.f, -300.f });
 		myDebugText->SetText("едц");
 		myDebugText->SetScale({ 1.f, 1.f });
@@ -346,11 +309,14 @@ namespace Prism
 
 		myMainThreadID = std::this_thread::get_id();
 
+		myModelLoaderThread = new std::thread(&ModelLoader::Run, ModelLoader::GetInstance());
+
+		myModelLoaderThreadID = myModelLoaderThread->get_id();
 		ENGINE_LOG("Engine Init Successful");
 		return true;
 	}
 
-	float Engine::PrintText(const std::string& aText, const CU::Vector2<float>& aPosition, eTextType aTextType, float aScale, CU::Vector4<float> aColor)
+	void Engine::PrintText(const std::string& aText, const CU::Vector2<float>& aPosition, eTextType aTextType, float aScale, CU::Vector4<float> aColor)
 	{
 		TextCommand toAdd;
 		toAdd.myText = aText;
@@ -365,10 +331,6 @@ namespace Prism
 		{
 			myDebugTexts.Add(toAdd);
 		}
-
-
-
-		return myText->GetWidth();
 	}
 
 	void Engine::PrintText(float aNumber, const CU::Vector2<float>& aPosition, eTextType aTextType, float aScale, CU::Vector4<float> aColor)
@@ -387,7 +349,7 @@ namespace Prism
 		PrintText(ss.str(), aPosition, aTextType, aScale, aColor);
 	}
 
-	void Engine::RenderText(TextProxy* aText)
+	void Engine::RenderText(Text* aText)
 	{
 		myTextsNew.Add(aText);
 	}
@@ -402,29 +364,51 @@ namespace Prism
 		myDirectX->SetBackBufferAsTarget();
 	}
 
-	void Engine::SetDepthBufferState(eDepthStencil aState)
+	void Engine::EnableZBuffer()
 	{
-		myDirectX->SetDepthBufferState(aState);
+		myDirectX->EnableZBuffer();
 	}
 
-	eDepthStencil Engine::GetDepthBufferState() const
+	void Engine::DisableZBuffer()
 	{
-		return myDirectX->GetDepthBufferState();
+		myDirectX->DisableZBuffer();
 	}
 
-	void Engine::SetRasterizeState(eRasterizer aState)
+	void Engine::ToggleWireframe()
 	{
-		myDirectX->SetRasterizeState(aState);
+		myDirectX->EnableWireframe();
+
+		
+		if (myWireframeIsOn == true)
+		{
+			myDirectX->DisableWireframe();
+			myWireframeIsOn = false;
+			myWireframeShouldShow = false;
+			return;
+		}
+
+		myWireframeShouldShow = true;
+		myWireframeIsOn = true;
 	}
 
-	eRasterizer Engine::GetRasterizerState() const
+	void Engine::EnableWireframe()
 	{
-		return myDirectX->GetRasterizerState();
+		myDirectX->EnableWireframe();
 	}
 
-	void Engine::SetShouldRenderText(bool aStatus)
+	void Engine::DisableWireframe()
 	{
-		myShouldRenderText = aStatus;
+		myDirectX->DisableWireframe();
+	}
+
+	void Engine::EnableCulling()
+	{
+		myDirectX->EnableCulling();
+	}
+
+	void Engine::DisableCulling()
+	{
+		myDirectX->DisableCulling();
 	}
 
 	void Engine::StartFade(float aDuration)

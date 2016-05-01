@@ -9,7 +9,6 @@ namespace Prism
 	class DebugText : public BaseModel
 	{
 	public:
-		DebugText();
 		void Init(DebugFont* aFont);
 
 		void Render(const std::string& aString, const CU::Vector2<float>& aPosition

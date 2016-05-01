@@ -26,7 +26,6 @@ namespace Prism
 	{
 		friend class FBXFactory;
 		friend class DGFXLoader;
-		friend class ModelLoader;
 		friend class Instance;
 	public:
 		ModelAnimated();
@@ -38,14 +37,14 @@ namespace Prism
 
 		void SetEffect(Effect* aEffect);
 
-		void Render(const CU::Matrix44<float>& aOrientation);
-		void SetFileName(const std::string& aFileName) override;
+		void Render(const CU::Matrix44<float>& aOrientation, const CU::Vector3<float>& aCameraPosition);
 
-		float GetRadius() const;
+		void ActivateAlbedo(eOwnerType aOwner);
 
 	private:
 		bool myIsNULLObject;
 
+		CU::GrowingArray<D3D11_INPUT_ELEMENT_DESC*> myVertexFormat;
 		VertexIndexWrapper* myIndexBaseData;
 		VertexDataWrapper* myVertexBaseData;
 
@@ -55,24 +54,8 @@ namespace Prism
 		Animation* myAnimation;
 		CU::Matrix44f myOrientation;
 
-		float myRadius;
-
 		int myVertexCount;
 		ModelAnimated* myParent;
 		bool myInited;
 	};
-
-	inline void ModelAnimated::SetFileName(const std::string& aFileName)
-	{
-		myFileName = aFileName;
-		for (int i = 0; i < myChildren.Size(); ++i)
-		{
-			myChildren[i]->SetFileName(aFileName);
-		}
-	}
-
-	inline float ModelAnimated::GetRadius() const
-	{
-		return myRadius;
-	}
 }

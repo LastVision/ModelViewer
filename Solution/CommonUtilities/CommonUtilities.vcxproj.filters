@@ -109,17 +109,6 @@
     <ClInclude Include="GameConstants.h" />
     <ClInclude Include="GameEnum.h" />
     <ClInclude Include="GameStructs.h" />
-    <ClInclude Include="FuzzySet.h" />
-    <ClInclude Include="Tweener.h" />
-    <ClInclude Include="Quaternion.h">
-      <Filter>Math\Quaternion</Filter>
-    </ClInclude>
-    <ClInclude Include="ThreadUtilities.h" />
-    <ClInclude Include="Defines.h" />
-    <ClInclude Include="FileWatcher.h" />
-    <ClInclude Include="MurmurHash3.h">
-      <Filter>Hash</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Math">
@@ -149,12 +138,6 @@
     <Filter Include="Precompile">
       <UniqueIdentifier>{5cd0f21b-eebe-4a7f-a40e-24766a0f7791}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Math\Quaternion">
-      <UniqueIdentifier>{f41ade53-8367-4329-be78-8e627f3645d7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Hash">
-      <UniqueIdentifier>{8556c7af-d6fa-433a-81f0-50a6453bc5fc}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera2D.cpp">
@@ -174,16 +157,6 @@
     </ClCompile>
     <ClCompile Include="tinyxml2.cpp">
       <Filter>TinyXML2</Filter>
-    </ClCompile>
-    <ClCompile Include="FuzzySet.cpp" />
-    <ClCompile Include="Quaternion.cpp">
-      <Filter>Math\Quaternion</Filter>
-    </ClCompile>
-    <ClCompile Include="ThreadUtilities.cpp" />
-    <ClCompile Include="FileWatcher.cpp" />
-    <ClCompile Include="GameConstants.cpp" />
-    <ClCompile Include="MurmurHash3.cpp">
-      <Filter>Hash</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

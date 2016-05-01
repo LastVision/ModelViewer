@@ -9,7 +9,6 @@ namespace Prism
 	ModelProxy::ModelProxy()
 		: myModel(nullptr)
 		, myModelAnimated(nullptr)
-		, myRadius(0.f)
 	{
 	}
 
@@ -21,7 +20,7 @@ namespace Prism
 		}
 		else if (myModelAnimated != nullptr)
 		{
-			myModelAnimated->Render(aOrientation);
+			myModelAnimated->Render(aOrientation, aCameraPosition);
 		}
 	}
 
@@ -53,21 +52,5 @@ namespace Prism
 	void ModelProxy::SetEffect(Effect* aEffect)
 	{
 		myModel->SetEffect(aEffect);
-	}
-
-	float ModelProxy::GetRadius() const
-	{
-		return myRadius;
-		//if (myModel != nullptr)
-		//{
-		//	return myModel->GetRadius();
-		//}
-		//DL_ASSERT("Unable to find radius, reporting large (25.f) radius");
-		//return 25.f;
-	}
-
-	void ModelProxy::SetRadius(float aRadius)
-	{
-		myRadius = aRadius;
 	}
 }

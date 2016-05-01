@@ -10,10 +10,9 @@ namespace CU
 	class TimerManager
 	{
 	public:
-		//static void Create();
-		//static void Destroy();
-		//static TimerManager* GetInstance();
-		TimerManager();
+		static void Create();
+		static void Destroy();
+		static TimerManager* GetInstance();
 
 		void StartTimer(const std::string& aName);
 		Time StopTimer(const std::string& aName);
@@ -27,6 +26,8 @@ namespace CU
 
 		void CapFrameRate(float aFrameRate);
 	private:
+		TimerManager();
+		~TimerManager();
 
 		Timer myMasterTimer;
 		TimeUnit GetTime();

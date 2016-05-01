@@ -1,9 +1,0 @@
-C:\Users\stdaca1\Desktop\FPS\Programmering\Workbed\Machina.exe.config
-C:\Users\stdaca1\Desktop\FPS\Programmering\Workbed\Machina.exe
-C:\Users\stdaca1\Desktop\FPS\Programmering\Workbed\Machina.pdb
-C:\Users\stdaca1\Desktop\FPS\Programmering\Solution\Launcher\obj\Debug\Launcher.Form1.resources
-C:\Users\stdaca1\Desktop\FPS\Programmering\Solution\Launcher\obj\Debug\Launcher.Properties.Resources.resources
-C:\Users\stdaca1\Desktop\FPS\Programmering\Solution\Launcher\obj\Debug\Launcher.csproj.GenerateResource.Cache
-C:\Users\stdaca1\Desktop\FPS\Programmering\Solution\Launcher\obj\Debug\Machina.exe
-C:\Users\stdaca1\Desktop\FPS\Programmering\Solution\Launcher\obj\Debug\Machina.pdb
-C:\Users\stdaca1\Desktop\FPS\Programmering\Solution\Launcher\obj\Debug\Launcher.csprojResolveAssemblyReference.cache

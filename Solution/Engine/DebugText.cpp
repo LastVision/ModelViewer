@@ -13,17 +13,6 @@
 #include "IndexBufferWrapper.h"
 #include "Surface.h"
 
-Prism::DebugText::DebugText()
-	: BaseModel()
-	, myVertices(16)
-	, myIndices(16)
-	, myFont(nullptr)
-	, myTextWidth(0.f)
-	, myCharSpacing(0.f)
-	, myLastText("Not initialized.")
-{
-}
-
 void Prism::DebugText::Init(DebugFont* aFont)
 {
 	myEffect = EffectContainer::GetInstance()->GetEffect("Data/Resource/Shader/S_effect_fontDebug.fx");
@@ -44,19 +33,27 @@ void Prism::DebugText::Init(DebugFont* aFont)
 	InitSurface("DiffuseTexture", myFont->GetTexture()->GetFileName());
 	InitBlendState("DebugText::BlendState");
 
-	ZeroMemory(myInitData, sizeof(*myInitData));
+	ZeroMemory(myInitData, sizeof(myInitData));
+
+	myVertices.Init(16);
+	myIndices.Init(16);
 }
 
 void Prism::DebugText::Render(const std::string& aString, const CU::Vector2<float>& aPosition
 	, const CU::Vector2<float>& aScale, const CU::Vector4<float>& aColor)
 {
 	aColor;
+	if (Engine::GetInstance()->myWireframeShouldShow == true)
+	{
+		Engine::GetInstance()->DisableWireframe();
+	}
+
 	if (myLastText != aString)
 	{
 		ConstructBuffers(aString);
 	}
 
-	Engine::GetInstance()->SetDepthBufferState(eDepthStencil::Z_DISABLED);
+	Engine::GetInstance()->DisableZBuffer();
 
 	myPosition = aPosition;
 	myScale = aScale;
@@ -74,7 +71,12 @@ void Prism::DebugText::Render(const std::string& aString, const CU::Vector2<floa
 
 	BaseModel::Render();
 
-	Engine::GetInstance()->SetDepthBufferState(eDepthStencil::Z_ENABLED);
+	Engine::GetInstance()->EnableZBuffer();
+
+	if (Engine::GetInstance()->myWireframeShouldShow == true)
+	{
+		Engine::GetInstance()->EnableWireframe();
+	}
 }
 
 

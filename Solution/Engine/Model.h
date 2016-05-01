@@ -24,50 +24,30 @@ namespace Prism
 	{
 		friend class DGFXLoader;
 		friend class FBXFactory;
-		friend class ModelLoader;
 	public:
 		Model();
 		~Model();
 
-		void Init(int aMaxInstances, bool aLightMesh = false);
+		void Init();
 		void InitCube(float aWidth = 1.f, float aHeight = 1.f, float aDepth = 1.f
 				, CU::Vector4f aColour = { 0.7f, 0.7f, 0.7f, 1.f });
 
 		void AddChild(Model* aChild);
 		void SetLodGroup(LodGroup* aLodGroup);
 
+		
 		void SetEffect(Effect* aEffect);
 
 		void Render(const CU::Matrix44<float>& aOrientation, const CU::Vector3<float>& aCameraPosition);
 
-		void DeActivateSurfaces();
+		void ActivateAlbedo(eOwnerType aOwner);
 		
-		bool SetGPUState(const CU::GrowingArray<CU::Matrix44<float>>& someWorldMatrices
-			, const CU::GrowingArray<CU::Vector3<float>>& someScales
-			, const CU::GrowingArray<float>& someHeights);
-		int GetIndexCount();
-		int GetVertexStart();
-		CU::GrowingArray<Model*>& GetChildren();
-
-
-		const std::string& GetTechniqueName() const override;
-		Model* GetRealModel(const CU::Vector3<float>& aModelPosition, const CU::Vector3<float>& aCameraPosition);
-		void SetFileName(const std::string& aFileName) override;
-
-		float GetRadius() const;
-		bool IsNullObject();
-
-		CU::GrowingArray<CU::Matrix44<float>> myMatrices;
-		CU::GrowingArray<CU::Vector3<float>> myScales;
-		CU::GrowingArray<float> myHeights;
 
 	private:
-		void operator=(Model&) = delete;
-		void InitInstancingBuffers();
-		void SetupInstancingBuffers();
+		void EvaluateEffectTechnique();
 		bool myIsNULLObject;
 
-		
+		CU::GrowingArray<D3D11_INPUT_ELEMENT_DESC*> myVertexFormat;
 		VertexIndexWrapper* myIndexBaseData;
 		VertexDataWrapper* myVertexBaseData;
 
@@ -80,28 +60,5 @@ namespace Prism
 		bool myInited;
 		bool myIsLodGroup;
 		LodGroup* myLodGroup;
-
-		float myRadius;
-
-		D3D11_BUFFER_DESC* myInstancingBufferDesc;
-		VertexBufferWrapper* myInstancingMatrixBuffer;
-		VertexBufferWrapper* myInstancingScaleBuffer;
-		VertexBufferWrapper* myInstancingHeightBuffer;
-		ID3D11Buffer* myVertexBuffers[4];
-		int myMaxInstances;
 	};
-
-	inline void Model::SetFileName(const std::string& aFileName)
-	{
-		myFileName = aFileName;
-		for (int i = 0; i < myChildren.Size(); ++i)
-		{
-			myChildren[i]->SetFileName(aFileName);
-		}
-	}
-
-	inline float Model::GetRadius() const
-	{
-		return myRadius;
-	}
 }

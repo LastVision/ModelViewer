@@ -12,6 +12,6 @@ namespace Prism
 
 	AnimationProxy::~AnimationProxy()
 	{
-		myAnimation = nullptr;
+		delete myAnimation;
 	}
 }

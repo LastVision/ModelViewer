@@ -104,7 +104,6 @@ struct ModelData
 	int myVertexCount;
 	int myVertexStride;
 	int myIndexCount;
-	float myRadius;
 
 	std::vector<TextureInfo> myTextures;
 	FBXLoaderArray<Layout> myLayout;
@@ -198,7 +197,6 @@ public:
 	CU::Matrix44<float> myRotationPivot;
 	FBXLoaderArray<FbxModelData*> myChildren;
 	float myFPS;
-	float myRadius;
 };
 
 class FBXLoader

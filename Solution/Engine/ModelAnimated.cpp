@@ -20,14 +20,13 @@ namespace Prism
 		: BaseModel()
 		, myChildren(32)
 		, myChildTransforms(32)
+		, myVertexFormat(8)
 		, myIsNULLObject(true)
 		, myVertexBaseData(nullptr)
 		, myIndexBaseData(nullptr)
 		, myInited(false)
 		, myParent(nullptr)
 		, myVertexCount(0)
-		, myTransformation(nullptr)
-		, myAnimation(nullptr)
 	{
 	}
 
@@ -35,7 +34,8 @@ namespace Prism
 	{
 		myChildren.DeleteAll();
 		myChildTransforms.DeleteAll();
-		myAnimation = nullptr; // do not delete, owned by DGFXLoader
+		myVertexFormat.DeleteAll();
+		delete myAnimation;
 		delete myVertexBaseData;
 		delete myIndexBaseData;
 	}
@@ -52,7 +52,7 @@ namespace Prism
 			{
 				vertexDesc[i] = *myVertexFormat[i];
 			}
-			EvaluateEffectTechnique(false);
+
 			InitInputLayout(vertexDesc, size, "ModelAnimated::InputLayout");
 			delete[] vertexDesc;
 			InitVertexBuffer(myVertexBaseData->myStride, D3D11_USAGE_IMMUTABLE, 0);
@@ -111,8 +111,9 @@ namespace Prism
 		}
 	}
 
-	void ModelAnimated::Render(const CU::Matrix44<float>& aOrientation)
+	void ModelAnimated::Render(const CU::Matrix44<float>& aOrientation, const CU::Vector3<float>& aCameraPosition)
 	{
+		aCameraPosition;
 		if (myIsNULLObject == false)
 		{
 			float blendFactor[4];
@@ -125,6 +126,19 @@ namespace Prism
 			myEffect->SetWorldMatrix(aOrientation);
 
 			BaseModel::Render();
+		}
+	}
+
+	void ModelAnimated::ActivateAlbedo(eOwnerType aOwner)
+	{
+		for (int i = 0; i < mySurfaces.Size(); ++i)
+		{
+			mySurfaces[i]->ActivateAlbedo(aOwner);
+		}
+
+		for (int i = 0; i < myChildren.Size(); ++i)
+		{
+			myChildren[i]->ActivateAlbedo(aOwner);
 		}
 	}
 }

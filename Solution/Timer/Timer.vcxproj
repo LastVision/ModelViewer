@@ -45,11 +45,6 @@
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TimerManager.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Memory\Memory.vcxproj">
-      <Project>{25945336-03d1-42a6-8764-7ef11dbc42e6}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{62C9B6F1-E90E-49C7-B0C6-3809FCA2065D}</ProjectGuid>
     <RootNamespace>Timer</RootNamespace>
@@ -124,7 +119,7 @@
     <OutDir>$(SolutionDir)..\Libs\</OutDir>
     <IntDir>$(SolutionDir)..\temp\$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName)_$(Configuration)</TargetName>
-    <IncludePath>$(SolutionDir)\DL_Debug;$(SolutionDir)\Memory;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\DL_Debug;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Internal|Win32'">
     <OutDir>$(SolutionDir)..\Libs\</OutDir>

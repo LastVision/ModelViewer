@@ -1,26 +1,18 @@
 #include "stdafx.h"
-#include "Camera.h"
-#include "FontProxy.h"
+#include "Font.h"
 #include "Surface.h"
 #include "Text.h"
 #include "Texture.h"
 
-#include "Engine.h"
-
-Prism::Text::Text(const FontProxy& aFont, bool aIs3d, bool aShouldFollowCamera)
+Prism::Text::Text(const Font& aFont)
 	: myFont(aFont)
 	, myColor(1.f, 1.f, 1.f, 1.f)
-	, myShouldFollowCamera(aShouldFollowCamera)
-	, myText("")
 {
-	if (aIs3d == false)
-	{
-		myEffect = EffectContainer::GetInstance()->GetEffect("Data/Resource/Shader/S_effect_font.fx");
-	}
-	else
-	{
-		myEffect = EffectContainer::GetInstance()->GetEffect("Data/Resource/Shader/S_effect_font3d.fx");
-	}
+	//from debugText
+	myEffect = EffectContainer::GetInstance()->GetEffect("Data/Resource/Shader/S_effect_font.fx");
+	//myFont = aFont;
+	//myCharSize = myFont->GetCharSize();
+	//myCharSpacing = 17.f;
 	myScale = { 1.f, 1.f };
 
 	D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
@@ -32,10 +24,10 @@ Prism::Text::Text(const FontProxy& aFont, bool aIs3d, bool aShouldFollowCamera)
 	InitInputLayout(vertexDesc, ARRAYSIZE(vertexDesc), "Text::InputLayout");
 	InitVertexBuffer(sizeof(VertexPosUV), D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 	InitIndexBuffer();
-	InitSurface("DiffuseTexture", myFont.GetFilePath());
+	InitSurface("DiffuseTexture", myFont.GetTexture()->GetFileName());
 	InitBlendState("Text::BlendState");
 
-	ZeroMemory(myInitData, sizeof(*myInitData));
+	ZeroMemory(myInitData, sizeof(myInitData));
 
 	myVertices.Init(1024);
 	myIndices.Init(1024);
@@ -51,13 +43,6 @@ void Prism::Text::SetText(const std::string& aText)
 		return;
 	}
 
-	float aspect = Engine::GetInstance()->GetWindowSize().x / Engine::GetInstance()->GetWindowSize().y;
-
-	if (aspect < 1.5f)
-	{
-		myScale = CU::Vector2<float>(0.5f, 0.5f);
-	}
-
 	if (aText == "")
 	{
 		myText = " ";
@@ -70,9 +55,13 @@ void Prism::Text::SetText(const std::string& aText)
 	ConstructBuffers();
 }
 
-void Prism::Text::Render(const CU::Vector2<float>& aPosition, const CU::Vector2<float>& aScale, const CU::Vector4<float>& aColor)
+void Prism::Text::Render()
 {
-	Engine::GetInstance()->SetDepthBufferState(eDepthStencil::Z_DISABLED);
+	if (Engine::GetInstance()->myWireframeShouldShow == true)
+	{
+		Engine::GetInstance()->DisableWireframe();
+	}
+	Engine::GetInstance()->DisableZBuffer();
 	
 	float blendFactor[4];
 	blendFactor[0] = 0.f;
@@ -82,68 +71,17 @@ void Prism::Text::Render(const CU::Vector2<float>& aPosition, const CU::Vector2<
 
 	myEffect->SetBlendState(myBlendState, blendFactor);
 	myEffect->SetProjectionMatrix(Engine::GetInstance()->GetOrthogonalMatrix());
-	myEffect->SetPosAndScale(aPosition, aScale);
-	myEffect->SetColor(aColor);
+	myEffect->SetPosAndScale(myPosition, myScale);
+	myEffect->SetColor(myColor);
 
 	BaseModel::Render();
 
-	Engine::GetInstance()->SetDepthBufferState(eDepthStencil::Z_ENABLED);
-}
+	Engine::GetInstance()->EnableZBuffer();
 
-void Prism::Text::Render(const Camera* aCamera, const CU::Matrix44<float>& aOrientation, const CU::Vector4<float>& aColor)
-{
-	Engine::GetInstance()->SetDepthBufferState(eDepthStencil::Z_DISABLED);
-	float blendFactor[4];
-	blendFactor[0] = 0.f;
-	blendFactor[1] = 0.f;
-	blendFactor[2] = 0.f;
-	blendFactor[3] = 0.f;
-
-	myEffect->SetBlendState(myBlendState, blendFactor);
-	if (myShouldFollowCamera == true)
+	if (Engine::GetInstance()->myWireframeShouldShow == true)
 	{
-		myEffect->SetWorldMatrix(aOrientation * aCamera->GetOrientation());
+		Engine::GetInstance()->EnableWireframe();
 	}
-	else
-	{
-		myEffect->SetWorldMatrix(aOrientation);
-	}
-	myEffect->SetViewMatrix(CU::InverseSimple(aCamera->GetOrientation()));
-	myEffect->SetProjectionMatrix(aCamera->GetProjection());
-	myEffect->SetViewProjectionMatrix(aCamera->GetViewProjection());
-	myEffect->SetPosAndScale({ 0.f, 0.f }, { 200.f, 200.f });
-	myEffect->SetColor(aColor);
-
-	BaseModel::Render();
-	Engine::GetInstance()->SetDepthBufferState(eDepthStencil::Z_ENABLED);
-}
-
-void Prism::Text::Render(const Camera* aCamera, const CU::Matrix44<float>& aOrientation, const CU::Vector2<float>& aScale, const CU::Vector4<float>& aColor)
-{
-	Engine::GetInstance()->SetDepthBufferState(eDepthStencil::Z_DISABLED);
-	float blendFactor[4];
-	blendFactor[0] = 0.f;
-	blendFactor[1] = 0.f;
-	blendFactor[2] = 0.f;
-	blendFactor[3] = 0.f;
-
-	myEffect->SetBlendState(myBlendState, blendFactor);
-	if (myShouldFollowCamera == true)
-	{
-		myEffect->SetWorldMatrix(aOrientation * aCamera->GetOrientation());
-	}
-	else
-	{
-		myEffect->SetWorldMatrix(aOrientation);
-	}
-	myEffect->SetViewMatrix(CU::InverseSimple(aCamera->GetOrientation()));
-	myEffect->SetProjectionMatrix(aCamera->GetProjection());
-	myEffect->SetViewProjectionMatrix(aCamera->GetViewProjection());
-	myEffect->SetPosAndScale({ 0.1f, 0.9f }, aScale);
-	myEffect->SetColor(aColor);
-
-	BaseModel::Render();
-	Engine::GetInstance()->SetDepthBufferState(eDepthStencil::Z_ENABLED);
 }
 
 float Prism::Text::GetWidth() const
@@ -159,6 +97,11 @@ float Prism::Text::GetWidth() const
 
 void Prism::Text::ConstructBuffers()
 {
+	//debug:
+	//CU::Vector2<float> myCharSize(16.f, 16.f);
+	//float myCharSpacing(0);
+	//debug end
+
 	int numOfLetters = myText.length();
 	float drawX = 0;
 	float drawY = 0;
@@ -172,11 +115,11 @@ void Prism::Text::ConstructBuffers()
 		if (myText[i] == '\n')
 		{
 			drawX = 0;
-			drawY -= 33.f;
+			drawY -= 48.f;
 			++row;
 			continue;
 		}
-		CharacterData charData = myFont.GetCharData(myText[i]);
+		Font::CharacterData charData = myFont.GetCharData(myText[i]);
 
 		float left = drawX + charData.myOffset.x;
 		float right = left + charData.mySize.x;
@@ -220,4 +163,6 @@ void Prism::Text::ConstructBuffers()
 
 	mySurfaces[0]->SetVertexCount(myVertices.Size());
 	mySurfaces[0]->SetIndexCount(myIndices.Size());
+
+	//myTextWidth = drawX - myTextWidth;
 }

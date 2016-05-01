@@ -30,7 +30,6 @@ namespace CU
 		inline void Add(const ObjectType& aObject);
 		inline void AddEmptyObject();
 		inline void Insert(SizeType aIndex, const ObjectType& aObject);
-		inline void InsertFirst(const ObjectType& aObject);
 		inline void DeleteCyclic(ObjectType& aObject);
 		inline void DeleteCyclicAtIndex(SizeType aItemNumber);
 		inline void DeleteNonCyclicAtIndex(SizeType aItemNumber);
@@ -38,7 +37,7 @@ namespace CU
 		inline void RemoveCyclicAtIndex(SizeType aItemNumber);
 		inline void RemoveNonCyclic(const ObjectType& aObject);
 		inline void RemoveNonCyclicAtIndex(SizeType aItemNumber);
-		inline SizeType Find(const ObjectType& aObject) const;
+		inline SizeType Find(const ObjectType& aObject);
 
 		inline ObjectType& GetLast();
 		inline const ObjectType& GetLast() const;
@@ -53,13 +52,6 @@ namespace CU
 		__forceinline SizeType GetCapacity() const;
 
 		inline ObjectType* GetArrayAsPointer();
-
-		typedef ObjectType* iterator;
-		typedef const ObjectType* const_iterator;
-		iterator begin() { return &myData[0]; }
-		const_iterator begin() const { return &myData[0]; }
-		iterator end() { return &myData[myCurrentSize]; }
-		const_iterator end() const { return &myData[myCurrentSize]; }
 	private:
 		inline void Resize(int aNewSize);
 		ObjectType* myData;
@@ -75,17 +67,12 @@ namespace CU
 {
 	GA_TEMPLATE
 	inline GA_TYPE::GrowingArray()
-		: myData(nullptr)
-		, myCurrentSize(0)
-		, myMaxSize(0)
-		, myUseSafeModeFlag(true)
-		, myIsInit(false)
 	{
-		//myData = nullptr;
-		//myCurrentSize = 0;
-		//myMaxSize = 0;
-		//myUseSafeModeFlag = true;
-		//myIsInit = false;
+		myData = nullptr;
+		myCurrentSize = 0;
+		myMaxSize = 0;
+		myUseSafeModeFlag = true;
+		myIsInit = false;
 	}
 
 	GA_TEMPLATE
@@ -238,21 +225,6 @@ namespace CU
 	}
 
 	GA_TEMPLATE
-	inline void GA_TYPE::InsertFirst(const ObjectType& aObject)
-	{
-		DL_ASSERT_EXP(myIsInit == true, "Not initialized, run Init first.");
-		
-		if (myCurrentSize == 0)
-		{
-			Add(aObject);
-		}
-		else
-		{
-			Insert(0, aObject);
-		}
-	}
-
-	GA_TEMPLATE
 	inline void GA_TYPE::DeleteCyclic(ObjectType& aObject)
 	{
 		DL_ASSERT_EXP(myIsInit == true, "Not initialized, run Init first.");
@@ -352,7 +324,7 @@ namespace CU
 	}
 
 	GA_TEMPLATE
-	inline SizeType GA_TYPE::Find(const ObjectType& aObject) const
+	inline SizeType GA_TYPE::Find(const ObjectType& aObject)
 	{
 		DL_ASSERT_EXP(myIsInit == true, "Not initialized, run Init first.");
 

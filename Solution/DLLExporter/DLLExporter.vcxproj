@@ -98,7 +98,7 @@
     <OutDir>$(SolutionDir)..\Workbed\bin\</OutDir>
     <IntDir>$(SolutionDir)..\temp\$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName)_Release</TargetName>
-    <IncludePath>$(SolutionDir)..\FBX\;$(SolutionDir)Engine;$(SolutionDir)\DL_Debug;$(SolutionDir)\CommonUtilities;$(SolutionDir)\Timer;$(SolutionDir)\InputWrapper;$(SolutionDir)\..\DirectX\Include;$(VTUNE_DIR)\include\;$(SolutionDir)ParticleSystem;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)..\FBX\;$(SolutionDir)Engine;$(SolutionDir)\DL_Debug;$(SolutionDir)\CommonUtilities;$(SolutionDir)\Timer;$(SolutionDir)\InputWrapper;$(SolutionDir)\..\DirectX\Include;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Internal|Win32'">
@@ -214,8 +214,6 @@
     <ClInclude Include="DLLCamera.h" />
     <ClInclude Include="DLLExport.h" />
     <ClInclude Include="DLLModel.h" />
-    <ClInclude Include="DLLParticle.h" />
-    <ClInclude Include="DLLParticleData.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonUtilities\CommonUtilities.vcxproj">
@@ -230,16 +228,12 @@
     <ProjectReference Include="..\InputWrapper\InputWrapper.vcxproj">
       <Project>{e6bd4153-64be-4109-8d3c-724baadab8af}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\ParticleSystem\ParticleSystem.vcxproj">
-      <Project>{f9457655-c0bd-4c0f-a7f9-1197da5c5c6a}</Project>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DLLApp.cpp" />
     <ClCompile Include="DLLCamera.cpp" />
     <ClCompile Include="DLLExport.cpp" />
     <ClCompile Include="DLLModel.cpp" />
-    <ClCompile Include="DLLParticle.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -21,13 +21,12 @@ public:
 	void Rotate(const float anAngle);
 	void Move(CU::Vector3<float> aVector);
 	void Zoom(float aFraction);
-	void SetPos(const CU::Vector2<float>& aPos);
-	void SetTargetPos(const CU::Vector2<float>& aPos);
+	void SetPos(const CU::Vector2<float> aPos);
+	void SetTargetPos(const CU::Vector2<float> aPos);
 	void Update(float aDelta);
 	bool IsShaking();
 	void Shake(float aDuration);
 	void StopShaking();
-
 private:
 	void SetProjection();
 
@@ -47,13 +46,13 @@ inline const CU::Vector2<float> Camera2D::GetPosition() const
 	return myOrientation.GetPos() / myResolutionScale;
 }
 
-inline void Camera2D::SetPos(const CU::Vector2<float>& aPos)
+inline void Camera2D::SetPos(const CU::Vector2<float> aPos)
 {
 	myTargetPos = aPos * myResolutionScale;
 	myOrientation.SetPos(aPos * myResolutionScale);
 }
 
-inline void Camera2D::SetTargetPos(const CU::Vector2<float>& aPos)
+inline void Camera2D::SetTargetPos(const CU::Vector2<float> aPos)
 {
 	myTargetPos = aPos * myResolutionScale;
 }

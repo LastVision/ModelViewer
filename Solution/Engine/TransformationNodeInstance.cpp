@@ -9,14 +9,13 @@ namespace Prism
 	TransformationNodeInstance::TransformationNodeInstance()
 		: myTransformationNode(nullptr)
 		, myChildren(4)
-		, myElapsedTime(0.f)
 	{
 	}
 
 
 	TransformationNodeInstance::~TransformationNodeInstance()
 	{
-		SAFE_DELETE(myTransformationNode);
+		delete myTransformationNode;
 		if (myChildren.Size() > 0)
 		{
 			myChildren.DeleteAll();

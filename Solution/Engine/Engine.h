@@ -37,11 +37,11 @@ namespace Prism
 	class DirectX;
 	class Effect;
 	class FBXFactory;
-	class FontProxy;
+	class Font;
 	class Model;
 	class ModelProxy;
 	class Sprite;
-	class TextProxy;
+	class Text;
 
 	struct SetupInfo;
 
@@ -51,7 +51,6 @@ namespace Prism
 		static bool Create(HWND& aHwnd, WNDPROC aWndProc, SetupInfo& aSetupInfo);
 		static void Destroy();
 		static Engine* GetInstance();
-		void Update(float aDeltaTime);
 		void Render();
 		void OnResize(int aWidth, int aHeigth);
 		bool IsFullscreen() const;
@@ -60,14 +59,10 @@ namespace Prism
 		ID3D11Device* GetDevice();
 		ID3D11DeviceContext* GetContex();
 		ID3D11DepthStencilView* GetDepthView();
-		ID3D11RenderTargetView* GetBackbuffer();
+		ID3D11RenderTargetView* GetDepthBuffer();
 		ID3D11ShaderResourceView* GetBackbufferView();
 		ID3D11Texture2D* GetDepthBufferTexture();
-
-		void SetDepthStencil(ID3D11DepthStencilView* aStencil);
-		void RestoreDepthStencil();
-
-		FontProxy* GetFont(eFont aFont);
+		Font* GetFont(eFont aFont);
 		void SetDebugName(ID3D11DeviceChild* aChild, const std::string& aName);
 
 		Model* DLLLoadModel(const std::string& aModelPath, Effect* aEffect);
@@ -76,28 +71,31 @@ namespace Prism
 		const CU::Vector2<int>& GetWindowSizeInt() const;
 		const CU::Matrix44<float>& GetOrthogonalMatrix() const;
 
-		float PrintText(const std::string& aText, const CU::Vector2<float>& aPosition, eTextType aTextType, float aScale = 1.f, CU::Vector4<float> aColor = { 1.f, 1.f, 1.f, 1.f });
+		void PrintText(const std::string& aText, const CU::Vector2<float>& aPosition, eTextType aTextType, float aScale = 1.f, CU::Vector4<float> aColor = { 1.f, 1.f, 1.f, 1.f });
 		void PrintText(float aNumber, const CU::Vector2<float>& aPosition, eTextType aTextType, float aScale = 1.f, CU::Vector4<float> aColor = { 1.f, 1.f, 1.f, 1.f });
 		void PrintText(int aNumber, const CU::Vector2<float>& aPosition, eTextType aTextType, float aScale = 1.f, CU::Vector4<float> aColor = { 1.f, 1.f, 1.f, 1.f });
 
-		void RenderText(TextProxy* aText);
+		void RenderText(Text* aText);
 
 		void RestoreViewPort();
 		void SetBackBufferAsTarget();
 
-		void SetDepthBufferState(eDepthStencil aState);
-		eDepthStencil GetDepthBufferState() const;
+		void EnableZBuffer();
+		void DisableZBuffer();
 
-		void SetRasterizeState(eRasterizer aState);
-		eRasterizer GetRasterizerState() const;
+		void ToggleWireframe();
+
+		void EnableWireframe();
+		void DisableWireframe();
+
+		void EnableCulling();
+		void DisableCulling();
 
 		void SetShowDebugText(bool aShowDebug);
 		void SetClearColor(const CU::Vector4<float>& aClearColor);
 
 		bool UsePBLPixelShader();
 		void TogglePBLPixelShader();
-
-		void SetShouldRenderText(bool aStatus);
 
 		void StartFade(float aDuration);
 
@@ -120,16 +118,15 @@ namespace Prism
 		
 		bool myWireframeIsOn;
 		bool myUsePBLPixelShader;
-		bool myShouldRenderText;
 		
 
 		DirectX* myDirectX;
 		SetupInfo* mySetupInfo;
 		FBXFactory* myModelFactory;
-		FontProxy* myDialogueFont;
-		FontProxy* myConsoleFont;
-		TextProxy* myText;
-		TextProxy* myDebugText;
+		Font* myDialogueFont;
+		Font* myConsoleFont;
+		Text* myText;
+		Text* myDebugText;
 		FadeData myFadeData;
 
 		CU::Vector4<float> myClearColor;
@@ -147,7 +144,7 @@ namespace Prism
 		CU::GrowingArray<TextCommand> myTexts;
 		CU::GrowingArray<TextCommand> myDebugTexts;
 		bool myShowDebugText;
-		CU::GrowingArray<TextProxy*> myTextsNew;
+		CU::GrowingArray<Text*> myTextsNew;
 	};
 }
 

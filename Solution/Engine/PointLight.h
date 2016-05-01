@@ -1,7 +1,5 @@
 #pragma once
 
-#include "LightStructs.h"
-
 class Camera;
 class Instance;
 
@@ -10,73 +8,74 @@ namespace Prism
 	class PointLight
 	{
 	public:
-		PointLight(unsigned int aGID, bool aAmbientOnly);
-		~PointLight();
-		void Render(const Camera& aCamera);
+		void Initiate();
+		void Render(Camera* aCamera);
 		void Update();
 
 		const CU::Vector4<float>& GetColor() const;
 		void SetColor(const CU::Vector4<float>& aVector);
 
-		CU::Vector4<float> GetPosition() const;
-		void SetPosition(const CU::Vector3<float>& aPosition);
+		const CU::Vector4<float>& GetPosition() const;
+		void SetPosition(const CU::Vector4<float>& aPosition);
 
 		void SetRange(float aRange);
 		float GetRange() const;
 
-		bool GetAmbientOnly() const;
 
-		const PointLightData& GetLightData() const;
+		void PerformTransformation(const CU::Matrix44<float>& aTransformation);
+
+
 	private:
-		unsigned int myGID;
 		CU::Vector4<float> myColor;
+		CU::Vector4<float> myPosition;
+		CU::Vector4<float> myOriginalPosition;
+
 		CU::Matrix44<float> myOrientation;
 
 		float myRange;
-		bool myAmbientOnly;
 
-		Instance* myLightMesh; 
-		PointLightData myLightData;
+		Instance* myInstance; 
+		float myObjectCullingRadius;
 	};
-
-	inline const CU::Vector4<float>& PointLight::GetColor() const
-	{
-		return myColor;
-	}
-
-	inline void PointLight::SetColor(const CU::Vector4<float>& aColor)
-	{
-		myColor = aColor;
-	}
-
-	inline CU::Vector4<float> PointLight::GetPosition() const
-	{
-		return myOrientation.GetPos4();
-	}
-
-	inline void PointLight::SetPosition(const CU::Vector3<float>& aPosition)
-	{
-		myOrientation.SetPos(aPosition);
-	}
-
-	inline void PointLight::SetRange(float aRange)
-	{
-		myRange = aRange;
-	}
-
-	inline float PointLight::GetRange() const
-	{
-		return myRange;
-	}
-
-	inline bool PointLight::GetAmbientOnly() const
-	{
-		return myAmbientOnly;
-	}
-
-	inline const PointLightData& PointLight::GetLightData() const
-	{
-		return myLightData;
-	}
 }
 
+inline void Prism::PointLight::Update()
+{
+	myPosition = myOriginalPosition * myOrientation;
+}
+
+inline const CU::Vector4<float>& Prism::PointLight::GetColor() const
+{
+	return myColor;
+}
+
+inline void Prism::PointLight::SetColor(const CU::Vector4<float>& aColor)
+{
+	myColor = aColor;
+}
+
+inline const CU::Vector4<float>& Prism::PointLight::GetPosition() const
+{
+	return myPosition;
+}
+
+inline void Prism::PointLight::SetPosition(const CU::Vector4<float>& aPosition)
+{
+	myPosition = aPosition;
+	myOriginalPosition = aPosition;
+}
+
+inline void Prism::PointLight::SetRange(float aRange)
+{
+	myRange = aRange;
+}
+
+inline float Prism::PointLight::GetRange() const
+{
+	return myRange;
+}
+
+inline void Prism::PointLight::PerformTransformation(const CU::Matrix44<float>& aTransformation)
+{
+	myOrientation = aTransformation * myOrientation;
+}

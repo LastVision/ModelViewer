@@ -9,7 +9,6 @@ namespace Prism
 	Animation::Animation()
 		: myAnimationData(4)
 		, myBoneNames(4)
-		, myAnimationLenght(0.f)
 	{
 		for (int i = 0; i < MAX_NR_OF_BONES; i++)
 		{
@@ -75,13 +74,6 @@ namespace Prism
 	{
 		myHierarchy = aBone;
 		SetBoneData(myHierarchy);
-	}
-	
-	void Animation::GetHiearchyToBone(const std::string& aBoneName, GUIBone& aBoneOut)
-	{
-		myHierarchy.GetBoneHiearchyByName(aBoneName, aBoneOut);
-		aBoneOut.myJoint = &myCalculatedBones[aBoneOut.myJointID];
-		aBoneOut.myBind = &myBindPoses[aBoneOut.myJointID];
 	}
 
 	void Animation::SetBoneData(HierarchyBone& aBone)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Defines.h>
+#include "Defines.h"
 #include <GrowingArray.h>
 #include "LightStructs.h"
 #include <Matrix.h>
@@ -64,13 +64,6 @@ namespace Prism
 		void SetAmbientHue(CU::Vector4f aVector);
 		void SetBones(const CU::StaticArray<CU::Matrix44<float>, MAX_NR_OF_BONES>& someBones);
 
-		void SetFogOfWarTexture(Texture* aFogOfWarTexture);
-		void SetShadowDepthTexture(Texture* aShadowDepthTexture);
-		void SetShadowMVP(const CU::Matrix44<float>& aMatrix);
-
-		void SetGradiantValue(float aValue);
-		void SetGradiantDirection(const CU::Vector2<float>& aDirection);
-
 	private:
 		ID3DX11Effect* myEffect;
 		ID3DX11EffectTechnique* myTechnique;
@@ -80,7 +73,6 @@ namespace Prism
 		ID3DX11EffectMatrixVariable* myViewMatrix;
 		ID3DX11EffectMatrixVariable* myWorldMatrix;
 		ID3DX11EffectMatrixVariable* myViewProjectionMatrix;
-		ID3DX11EffectMatrixVariable* myShadowMVP;
 
 		ID3DX11EffectScalarVariable* myEyePosition;
 		ID3DX11EffectScalarVariable* myTotalTime;
@@ -96,8 +88,6 @@ namespace Prism
 		ID3DX11EffectVariable* mySpotLight;
 
 		ID3DX11EffectShaderResourceVariable* myTexture;
-		ID3DX11EffectShaderResourceVariable* myFogOfWarTexture;
-		ID3DX11EffectShaderResourceVariable* myShadowDepthTexture;
 
 		ID3DX11EffectVectorVariable* mySpritePosAndScale;
 		ID3DX11EffectMatrixVariable* mySpriteOrientation;
@@ -114,9 +104,6 @@ namespace Prism
 		std::string myFileName;
 
 		CU::GrowingArray<EffectListener*> myEffectListeners;
-
-		ID3DX11EffectScalarVariable* myGradiantValue;
-		ID3DX11EffectVectorVariable* myGradiantDirection;
 	};
 
 

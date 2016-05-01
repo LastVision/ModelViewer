@@ -6,19 +6,7 @@
 namespace Prism
 {
 	TransformationNodeCurves::TransformationNodeCurves()
-		: myAnimationFPS(0)
-		, myAnimationType(AnimationType::ABSOLUTE_TRANSFORM)
-		, myStartTime(0.f)
-		, myEndTime(0.f)
-		, myNumberOfKeyFrames(0)
 	{
-		myRotationCurves[0] = nullptr;
-		myRotationCurves[1] = nullptr;
-		myRotationCurves[2] = nullptr;
-		myRotationCurves[3] = nullptr;
-		myTranslationCurves[0] = nullptr;
-		myTranslationCurves[1] = nullptr;
-		myTranslationCurves[2] = nullptr;
 	}
 
 

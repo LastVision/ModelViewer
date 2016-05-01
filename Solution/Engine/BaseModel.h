@@ -25,14 +25,8 @@ namespace Prism
 		virtual ~BaseModel();
 		Effect* GetEffect();
 
-		virtual const std::string& GetTechniqueName() const;
-		void SetTechniqueName(const std::string& aName);
-
-		virtual void SetFileName(const std::string& aFileName);
-
 	protected:
-		void EvaluateEffectTechnique(bool aInstanced);
-		virtual void Render();
+		void Render();
 
 		void InitInputLayout(D3D11_INPUT_ELEMENT_DESC* aVertexDescArray, int aArraySize, const std::string& aDebugName);
 		void InitVertexBuffer(int aVertexSize, int aBufferUsage, int aCPUUsage);
@@ -48,7 +42,7 @@ namespace Prism
 
 		Effect* myEffect;
 		CU::GrowingArray<Surface*> mySurfaces;
-		CU::GrowingArray<D3D11_INPUT_ELEMENT_DESC*> myVertexFormat;
+
 		ID3D11InputLayout* myVertexLayout;
 		ID3D11BlendState* myBlendState;
 		D3D11_BUFFER_DESC* myVertexBufferDesc;
@@ -64,14 +58,4 @@ namespace Prism
 		std::string myFileName;
 		std::string myTechniqueName;
 	};
-
-	inline const std::string& BaseModel::GetTechniqueName() const
-	{
-		return myTechniqueName;
-	}
-
-	inline void BaseModel::SetFileName(const std::string& aFileName)
-	{
-		myFileName = aFileName;
-	}
 }

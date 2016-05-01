@@ -11,7 +11,6 @@
 #include "tinyxml2.h"
 #include <vector>
 #include "Vector.h"
-#include <MemoryMacros.h>
 #include "GameConstants.h"
 #include "MathHelper.h"
-#include "ThreadUtilities.h"
+#include "Macros.h"

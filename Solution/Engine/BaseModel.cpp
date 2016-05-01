@@ -13,8 +13,6 @@ namespace Prism
 
 	BaseModel::BaseModel()
 		: myTechniqueName("Render")
-		, myVertexFormat(8)
-		, myVertexLayout(nullptr)
 	{
 		myVertexBufferDesc = new D3D11_BUFFER_DESC();
 		myIndexBufferDesc = new D3D11_BUFFER_DESC();
@@ -32,7 +30,6 @@ namespace Prism
 
 	BaseModel::~BaseModel()
 	{
-		myVertexFormat.DeleteAll();
 		if (myVertexBuffer != nullptr && myVertexBuffer->myVertexBuffer != nullptr)
 		{
 			myVertexBuffer->myVertexBuffer->Release();
@@ -68,69 +65,6 @@ namespace Prism
 		return myEffect;
 	}
 
-
-	void BaseModel::SetTechniqueName(const std::string& aName)
-	{
-		myTechniqueName = aName;
-	}
-
-	void BaseModel::EvaluateEffectTechnique(bool aInstanced)
-	{
-		int uvCount = 0;
-		bool hasVertexColor = false;
-		for (int i = 0; i < myVertexFormat.Size(); ++i)
-		{
-			std::string semanticName(myVertexFormat[i]->SemanticName);
-			if (semanticName == "TEXCOORD")
-			{
-				++uvCount;
-			}
-			if (semanticName == "COLOR")
-			{
-				hasVertexColor = true;
-			}
-		}
-
-		if (hasVertexColor == true)
-		{
-			if (uvCount == 2)
-			{
-				myTechniqueName = "Render_2UVSET_COLOR";
-
-			}
-			else if (uvCount == 1)
-			{
-				myTechniqueName = "Render_1UVSET_COLOR";
-			}
-			else
-			{
-				DL_ASSERT("Model EvaluateTechnique: invalid uv-set-count with vertexcolor.");
-			}
-		}
-		else
-		{
-			if (uvCount == 2)
-			{
-				myTechniqueName = "Render_2UVSET";
-
-			}
-			else if (uvCount == 1)
-			{
-				myTechniqueName = "Render_1UVSET";
-			}
-			else
-			{
-				DL_ASSERT("Model EvaluateTechnique: invalid uv-set-count without vertexcolor.");
-			}
-		}
-
-		
-		if (aInstanced == true)
-		{
-			myTechniqueName += "_INSTANCED";
-		}
-	}
-
 	void BaseModel::Render()
 	{
 		Engine::GetInstance()->GetContex()->IASetInputLayout(myVertexLayout);
@@ -147,6 +81,20 @@ namespace Prism
 			mySurfaces[s]->Activate();
 
 			ID3DX11EffectTechnique* tech = nullptr;
+			
+			//if (usePixelShader == false)
+			//{
+			//	tech = myEffect->GetEffect()->GetTechniqueByName("Render_No_Pixel_Shader");
+			//}
+			//else if (mySurfaces[s]->GetEmissive() == true)
+			//{
+			//	tech = myEffect->GetEffect()->GetTechniqueByName("Render_Emissive");
+			//}
+			//else
+			//{
+			//	tech = myEffect->GetTechnique();
+			//}
+
 			tech = myEffect->GetTechnique(myTechniqueName);
 
 			if (tech->IsValid() == false)
@@ -164,10 +112,8 @@ namespace Prism
 			{
 				tech->GetPassByIndex(i)->Apply(0, Engine::GetInstance()->GetContex());
 				Engine::GetInstance()->GetContex()->DrawIndexed(mySurfaces[s]->GetIndexCount()
-					, mySurfaces[s]->GetIndexStart(), 0);
+					, mySurfaces[s]->GetVertexStart(), 0);
 			}
-
-			mySurfaces[s]->DeActivate();
 		}
 	}
 
@@ -194,7 +140,7 @@ namespace Prism
 		myVertexBuffer->myNumberOfBuffers = 1;
 
 
-		ZeroMemory(myVertexBufferDesc, sizeof(*myVertexBufferDesc));
+		ZeroMemory(myVertexBufferDesc, sizeof(myVertexBufferDesc));
 		myVertexBufferDesc->Usage = static_cast<D3D11_USAGE>(aBufferUsage);
 		myVertexBufferDesc->BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		myVertexBufferDesc->CPUAccessFlags = aCPUUsage;
@@ -209,7 +155,7 @@ namespace Prism
 		myIndexBuffer->myByteOffset = 0;
 
 
-		ZeroMemory(myIndexBufferDesc, sizeof(*myIndexBufferDesc));
+		ZeroMemory(myIndexBufferDesc, sizeof(myIndexBufferDesc));
 		myIndexBufferDesc->Usage = D3D11_USAGE_IMMUTABLE;
 		myIndexBufferDesc->BindFlags = D3D11_BIND_INDEX_BUFFER;
 		myIndexBufferDesc->CPUAccessFlags = 0;
@@ -221,13 +167,13 @@ namespace Prism
 	{
 		Surface* surface = new Surface();
 
+		surface->SetEffect(myEffect);
 		surface->SetIndexCount(0);
 		surface->SetIndexStart(0);
 		surface->SetVertexCount(0);
 		surface->SetVertexStart(0);
 		surface->SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		surface->SetTexture(aResourceName, aFileName, true);
-		surface->SetEffect(myEffect);
 		mySurfaces.Add(surface);
 	}
 

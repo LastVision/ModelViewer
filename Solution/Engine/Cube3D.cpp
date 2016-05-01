@@ -317,24 +317,24 @@ namespace Prism
 
 
 		D3DX11_TECHNIQUE_DESC techDesc;
-		myEffect->GetTechnique("Render")->GetDesc(&techDesc);
+		myEffect->GetTechnique()->GetDesc(&techDesc);
 
 		Engine::GetInstance()->GetContex()->IASetPrimitiveTopology(myPrimitiveTopology);
 		if (myWireFrame == true)
 		{
 			for (UINT p = 0; p < techDesc.Passes; ++p)
 			{
-				myEffect->GetTechnique("Render")->GetPassByIndex(p)->Apply(0, Engine::GetInstance()->GetContex());
-				Prism::Engine::GetInstance()->SetRasterizeState(eRasterizer::WIRE_FRAME);
+				myEffect->GetTechnique()->GetPassByIndex(p)->Apply(0, Engine::GetInstance()->GetContex());
+				Engine::GetInstance()->EnableWireframe();
 				Engine::GetInstance()->GetContex()->DrawIndexed(myIndexBaseData->myNumberOfIndices, 0, 0);
-				Prism::Engine::GetInstance()->SetRasterizeState(eRasterizer::CULL_BACK);
+				Engine::GetInstance()->DisableWireframe();
 			}
 		}
 		else
 		{
 			for (UINT p = 0; p < techDesc.Passes; ++p)
 			{
-				myEffect->GetTechnique("Render")->GetPassByIndex(p)->Apply(0, Engine::GetInstance()->GetContex());
+				myEffect->GetTechnique()->GetPassByIndex(p)->Apply(0, Engine::GetInstance()->GetContex());
 				Engine::GetInstance()->GetContex()->DrawIndexed(myIndexBaseData->myNumberOfIndices, 0, 0);
 			}
 		}

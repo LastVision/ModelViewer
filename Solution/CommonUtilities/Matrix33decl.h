@@ -28,7 +28,7 @@ namespace CU
 		CU::Vector2<T> GetPos() const;
 		CU::Vector3<T> GetPos3() const;
 
-		inline Matrix33<T> operator=(const Matrix33<T>& aMatrix)
+		inline Matrix33<T> operator=(const Matrix33<T> aMatrix)
 		{
 			for (unsigned char i = 0; i < 9; ++i)
 			{

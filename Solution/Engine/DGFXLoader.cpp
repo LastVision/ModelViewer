@@ -33,34 +33,26 @@ namespace Prism
 			SAFE_DELETE(it->second);
 		}
 		myModelsAnimated.clear();
-
-		for (auto it = myAnimations.begin(); it != myAnimations.end(); ++it)
-		{
-			SAFE_DELETE(it->second);
-		}
-		myAnimations.clear();
 	}
 
-	Model* DGFXLoader::LoadModel(const std::string& aFilePath)
+	Model* DGFXLoader::LoadModel(const std::string& aFilePath, Effect* aEffect)
 	{
 		if (myModels.find(aFilePath) != myModels.end())
 		{
 			return myModels[aFilePath];
 		}
 
-		DL_PRINT_VA("Loading (as DGFX): %s", aFilePath.c_str());
-
 		std::string dgfxFile = CU::GetGeneratedDataFolderFilePath(aFilePath, "dgfx");
 
 #ifndef RELEASE_BUILD
 		if (CheckIfFbxIsNewer(dgfxFile) == true)
 		{
-			DL_ASSERT("Found a FBX-File thats newer than the DGFX-File, did you forget to run the tool?");
+			DL_MESSAGE_BOX("Found a FBX-File thats newer than the DGFX-File, did you forget to run the tool?", "Old DGFX", MB_ICONQUESTION);
 		}
 #endif
 
 
-		//CU::TimerManager::GetInstance()->StartTimer("LoadDGFX");
+		CU::TimerManager::GetInstance()->StartTimer("LoadDGFX");
 
 		std::fstream file;
 		file.open(dgfxFile.c_str(), std::ios::in | std::ios::binary);
@@ -71,21 +63,21 @@ namespace Prism
 			return nullptr;
 		}
 
-		Model* newModel = CreateModelHeader(file);
-		newModel = CreateModel(file, newModel);
+		Model* newModel = CreateModel(aEffect, file);
 
 		file.close();
 
-		//int elapsed = static_cast<int>(
-		//	CU::TimerManager::GetInstance()->StopTimer("LoadDGFX").GetMilliseconds());
-		//RESOURCE_LOG("DGFX-Model \"%s\" took %d ms to load", dgfxFile.c_str(), elapsed);
+		newModel->Init();
+		int elapsed = static_cast<int>(
+			CU::TimerManager::GetInstance()->StopTimer("LoadDGFX").GetMilliseconds());
+		RESOURCE_LOG("DGFX-Model \"%s\" took %d ms to load", dgfxFile.c_str(), elapsed);
 
 		myModels[aFilePath] = newModel;
 
 		return newModel;
 	}
 
-	ModelAnimated* DGFXLoader::LoadAnimatedModel(const std::string& aFilePath)
+	ModelAnimated* DGFXLoader::LoadAnimatedModel(const std::string& aFilePath, Effect* aEffect)
 	{
 		if (myModelsAnimated.find(aFilePath) != myModelsAnimated.end())
 		{
@@ -97,11 +89,11 @@ namespace Prism
 #ifndef RELEASE_BUILD
 		if (CheckIfFbxIsNewer(dgfxFile) == true)
 		{
-			DL_ASSERT("Found a FBX-File thats newer than the DGFX-File, did you forget to run the tool?");
+			DL_MESSAGE_BOX("Found a FBX-File thats newer than the DGFX-File, did you forget to run the tool?", "Old DGFX", MB_ICONQUESTION);
 		}
 #endif
 
-		//CU::TimerManager::GetInstance()->StartTimer("LoadDGFXAnimated");
+		CU::TimerManager::GetInstance()->StartTimer("LoadDGFXAnimated");
 
 		std::fstream file;
 		file.open(dgfxFile.c_str(), std::ios::in | std::ios::binary);
@@ -112,14 +104,15 @@ namespace Prism
 			return nullptr;
 		}
 
-		ModelAnimated* newModel = CreateModelAnimatedHeader(file);
-		newModel = CreateModelAnimated(aFilePath, file, newModel);
+		ModelAnimated* newModel = CreateModelAnimated(aEffect, file);
 
 		file.close();
 
-		//int elapsed = static_cast<int>(
-		//	CU::TimerManager::GetInstance()->StopTimer("LoadDGFXAnimated").GetMilliseconds());
-		//RESOURCE_LOG("Animated DGFX-Model \"%s\" took %d ms to load", dgfxFile.c_str(), elapsed);
+		newModel->Init();
+
+		int elapsed = static_cast<int>(
+			CU::TimerManager::GetInstance()->StopTimer("LoadDGFXAnimated").GetMilliseconds());
+		RESOURCE_LOG("Animated DGFX-Model \"%s\" took %d ms to load", dgfxFile.c_str(), elapsed);
 
 		myModelsAnimated[aFilePath] = newModel;
 
@@ -138,11 +131,11 @@ namespace Prism
 #ifndef RELEASE_BUILD
 		if (CheckIfFbxIsNewer(dgfxFile) == true)
 		{
-			DL_ASSERT("Found a FBX-File thats newer than the DGFX-File, did you forget to run the tool?");
+			DL_MESSAGE_BOX("Found a FBX-File thats newer than the DGFX-File, did you forget to run the tool?", "Old DGFX", MB_ICONQUESTION);
 		}
 #endif
 
-		//CU::TimerManager::GetInstance()->StartTimer("LoadAnimationDGFX");
+		CU::TimerManager::GetInstance()->StartTimer("LoadAnimationDGFX");
 
 
 		std::fstream stream;
@@ -163,9 +156,6 @@ namespace Prism
 			return nullptr;
 		}
 
-		float radius = 0.f;
-		stream.read((char*)&radius, sizeof(float));
-
 		int isNullObject = -1;
 		stream.read((char*)&isNullObject, sizeof(int));
 
@@ -181,25 +171,23 @@ namespace Prism
 			_wassert(L"ANIMATION NEEDS TO BE A NULLOBJECT, BUT IT WASNT", L"DGFXLoader.cpp", 189);
 		}
 
-		Animation* animation = LoadAnimation(aFilePath, nullptr, stream);
+		Animation* animation = LoadAnimation(nullptr, stream);
+
 		stream.close();
 
-		//int elapsed = static_cast<int>(
-		//	CU::TimerManager::GetInstance()->StopTimer("LoadAnimationDGFX").GetMilliseconds());
-		//RESOURCE_LOG("DGFX-Animation \"%s\" took %d ms to load", dgfxFile.c_str(), elapsed);
+		int elapsed = static_cast<int>(
+			CU::TimerManager::GetInstance()->StopTimer("LoadAnimationDGFX").GetMilliseconds());
+		RESOURCE_LOG("DGFX-Animation \"%s\" took %d ms to load", dgfxFile.c_str(), elapsed);
 
+		myAnimations[aFilePath] = animation;
 		return animation;
 	}
 
-	void DGFXLoader::GetHierarchyToBone(const std::string& aAnimationPath, const std::string& aBoneName, GUIBone& aBoneOut)
-	{
-		Animation* anim = LoadAnimation(aAnimationPath);
-		anim->GetHiearchyToBone(aBoneName, aBoneOut);
-	}
-
-	Model* DGFXLoader::CreateModelHeader(std::fstream& aStream)
+	Model* DGFXLoader::CreateModel(Effect* aEffect, std::fstream& aStream)
 	{
 		Model* tempModel = new Model();
+		tempModel->SetEffect(aEffect);
+
 		int fileVersion = -1;
 		aStream.read((char*)&fileVersion, sizeof(int));
 		DL_ASSERT_EXP(fileVersion == DGFX_VERSION, "Found a old DGFX-Model, try running the Converter again");
@@ -207,18 +195,6 @@ namespace Prism
 		{
 			assert(false && "Found a old DGFX-Model, RELEASE-ASSERT");
 			return nullptr;
-		}
-		aStream.read((char*)&tempModel->myRadius, sizeof(float));
-
-		return tempModel;
-	}
-
-	Model* DGFXLoader::CreateModel(std::fstream& aStream, Model* aModel)
-	{
-		Model* tempModel = aModel;
-		if (tempModel == nullptr)
-		{
-			tempModel = new Model();
 		}
 
 		int isNullObject = -1;
@@ -234,17 +210,7 @@ namespace Prism
 		{
 			tempModel->myIsNULLObject = false;
 
-			VertexIndexWrapper* indexWrapper = new VertexIndexWrapper();
-			VertexDataWrapper* vertexData = new VertexDataWrapper();
-			Surface* surface = new Surface();
-
-			LoadData(indexWrapper, vertexData, tempModel->myVertexFormat, *surface
-				, aStream);
-
-			tempModel->mySurfaces.Add(surface);
-			tempModel->myIndexBaseData = indexWrapper;
-			tempModel->myVertexBaseData = vertexData;
-
+			LoadModelData(tempModel, aEffect, aStream);
 			CU::Matrix44<float> matrix;
 			aStream.read((char*)&tempModel->myOrientation.myMatrix[0], sizeof(float) * 16);
 		}
@@ -258,38 +224,26 @@ namespace Prism
 		aStream.read((char*)&childCount, sizeof(int));
 		for (int i = 0; i < childCount; ++i)
 		{
-			tempModel->AddChild(CreateModel(aStream));
+			tempModel->AddChild(CreateModel(aEffect, aStream));
 		}
 
 		return tempModel;
 	}
 
-
-	ModelAnimated* DGFXLoader::CreateModelAnimatedHeader(std::fstream& aStream)
+	ModelAnimated* DGFXLoader::CreateModelAnimated(Effect* aEffect, std::fstream& aStream)
 	{
 		ModelAnimated* tempModel = new ModelAnimated();
+		tempModel->SetEffect(aEffect);
+
 		int fileVersion = -1;
 		aStream.read((char*)&fileVersion, sizeof(int));
-		DL_ASSERT_EXP(fileVersion == DGFX_VERSION, "Found a old DGFX-Model, try running the Converter again");
+		DL_ASSERT_EXP(fileVersion == DGFX_VERSION, "Found a old Animated DGFX-Model, try running the Converter again");
 		if (aStream.fail() == true)
 		{
-			assert(false && "Found a old DGFX-Model, RELEASE-ASSERT");
+			assert(false && "Found a old Animated DGFX-Model, RELEASE-ASSERT");
 			return nullptr;
 		}
-		aStream.read((char*)&tempModel->myRadius, sizeof(float));
 
-		return tempModel;
-	}
-
-	ModelAnimated* DGFXLoader::CreateModelAnimated(const std::string& aFBXPath, std::fstream& aStream, ModelAnimated* aModelAnimated)
-	{
-		ModelAnimated* tempModel = aModelAnimated;
-		
-		if (tempModel == nullptr)
-		{
-			tempModel = new ModelAnimated();
-		}
-		
 		int isNullObject = -1;
 		aStream.read((char*)&isNullObject, sizeof(int));
 
@@ -303,40 +257,27 @@ namespace Prism
 		if (isNullObject == 0)
 		{
 			tempModel->myIsNULLObject = false;
-
-			VertexIndexWrapper* indexWrapper = new VertexIndexWrapper();
-			VertexDataWrapper* vertexData = new VertexDataWrapper();
-			Surface* surface = new Surface();
-
-			LoadData(indexWrapper, vertexData, tempModel->myVertexFormat, *surface
-				, aStream);
-
-			tempModel->mySurfaces.Add(surface);
-			tempModel->myIndexBaseData = indexWrapper;
-			tempModel->myVertexBaseData = vertexData;
-
+			LoadModelAnimatedData(tempModel, aEffect, aStream);
 			CU::Matrix44<float> matrix;
 			aStream.read((char*)&tempModel->myOrientation.myMatrix[0], sizeof(float) * 16);
 		}
 
 		if (isAnimated == 1)
 		{
-			LoadAnimation(aFBXPath, tempModel, aStream);
+			LoadAnimation(tempModel, aStream);
 		}
 
 		int childCount = 0;
 		aStream.read((char*)&childCount, sizeof(int));
 		for (int i = 0; i < childCount; ++i)
 		{
-			tempModel->AddChild(CreateModelAnimated(aFBXPath, aStream));
+			tempModel->AddChild(CreateModelAnimated(aEffect, aStream));
 		}
 
 		return tempModel;
 	}
 
-	void DGFXLoader::LoadData(VertexIndexWrapper* aIndexWrapper, VertexDataWrapper* aVertexData
-		, CU::GrowingArray<D3D11_INPUT_ELEMENT_DESC*>& someInputElements, Surface& aSurface
-		, std::fstream& aStream)
+	void DGFXLoader::LoadModelData(Model* aOutData, Effect* aEffect, std::fstream& aStream)
 	{
 		int indexCount = 0;
 		aStream.read((char*)&indexCount, sizeof(int)); //Index count
@@ -344,10 +285,12 @@ namespace Prism
 		unsigned int* indexData = new unsigned int[indexCount];
 		aStream.read((char*)(indexData), sizeof(int) * indexCount); //All index data
 
-		aIndexWrapper->myFormat = DXGI_FORMAT_R32_UINT;
-		aIndexWrapper->myIndexData = (char*)indexData;
-		aIndexWrapper->mySize = indexCount * sizeof(unsigned int);
-		aIndexWrapper->myNumberOfIndices = indexCount;
+		VertexIndexWrapper* indexWrapper = new VertexIndexWrapper();
+		indexWrapper->myFormat = DXGI_FORMAT_R32_UINT;
+		indexWrapper->myIndexData = (char*)indexData;
+		indexWrapper->mySize = indexCount * sizeof(unsigned int);
+		indexWrapper->myNumberOfIndices = indexCount;
+		aOutData->myIndexBaseData = indexWrapper;
 
 
 		int vertexCount = 0;
@@ -359,10 +302,176 @@ namespace Prism
 		char* vertexRawData = new char[sizeOfBuffer];
 		aStream.read(vertexRawData, sizeOfBuffer); //All vertex data
 
-		aVertexData->myVertexData = vertexRawData;
-		aVertexData->myNumberOfVertices = vertexCount;
-		aVertexData->mySize = sizeOfBuffer;
-		aVertexData->myStride = stride*sizeof(float);
+		VertexDataWrapper* vertexData = new VertexDataWrapper();
+		vertexData->myVertexData = vertexRawData;
+		vertexData->myNumberOfVertices = vertexCount;
+		vertexData->mySize = sizeOfBuffer;
+		vertexData->myStride = stride*sizeof(float);
+		aOutData->myVertexBaseData = vertexData;
+
+
+		int layoutCount = 0;
+		aStream.read((char*)&layoutCount, sizeof(int)); //Inputlayout element count
+
+		for (int i = 0; i < layoutCount; ++i)
+		{
+			int byteOffset = 0;
+			aStream.read((char*)&byteOffset, sizeof(int)); //Inputlayout element count
+
+			int semanticIndex = 0;
+			aStream.read((char*)&semanticIndex, sizeof(int)); //Inputlayout semantic index
+
+
+			D3D11_INPUT_ELEMENT_DESC* desc = new D3D11_INPUT_ELEMENT_DESC();
+			desc->SemanticIndex = semanticIndex;
+			desc->AlignedByteOffset = byteOffset;
+			desc->InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+			desc->InputSlot = 0;
+			desc->InstanceDataStepRate = 0;
+
+			int type = -1;
+			aStream.read((char*)&type, sizeof(int)); //element type
+
+			if (type == eVertexLayout::VERTEX_POS)
+			{
+				desc->SemanticName = "POSITION";
+				desc->Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			}
+			else if (type == eVertexLayout::VERTEX_NORMAL)
+			{
+				desc->SemanticName = "NORMAL";
+				desc->Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			}
+			else if (type == eVertexLayout::VERTEX_UV)
+			{
+				desc->SemanticName = "TEXCOORD";
+				desc->Format = DXGI_FORMAT_R32G32_FLOAT;
+			}
+			else if (type == eVertexLayout::VERTEX_BINORMAL)
+			{
+				desc->SemanticName = "BINORMAL";
+				desc->Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			}
+			else if (type == eVertexLayout::VERTEX_TANGENT)
+			{
+				desc->SemanticName = "TANGENT";
+				desc->Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			}
+			else if (type == eVertexLayout::VERTEX_SKINWEIGHTS)
+			{
+				desc->SemanticName = "WEIGHTS";
+				desc->Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			}
+			else if (type == eVertexLayout::VERTEX_BONEID)
+			{
+				desc->SemanticName = "BONES";
+				desc->Format = DXGI_FORMAT_R32G32B32A32_SINT;
+			}
+			else if (type == eVertexLayout::VERTEX_COLOR)
+			{
+				desc->SemanticName = "COLOR";
+				desc->Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			}
+			else
+			{
+				DL_ASSERT("Found a invalid InputElement while loading DGFX");
+				assert(false && "Found a invalid InputElement while loading DGFX, RELEASE-ASSERT");
+			}
+
+			aOutData->myVertexFormat.Add(desc);
+		}
+
+		Surface surface;
+		surface.SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		surface.SetIndexCount(indexCount);
+		surface.SetVertexStart(0);
+		surface.SetIndexStart(0);
+		surface.SetVertexCount(vertexCount);
+		surface.SetEffect(aEffect);
+
+		int textureCount;
+		aStream.read((char*)&textureCount, sizeof(int)); //numberOfTextures
+		for (int i = 0; i < textureCount; ++i)
+		{
+			int textureType;
+			aStream.read((char*)&textureType, sizeof(int)); //textureType
+
+			std::string resourceName;
+			if (textureType == eTextureType::ALBEDO)
+			{
+				resourceName = "AlbedoTexture";
+			}
+			else if (textureType == eTextureType::NORMAL)
+			{
+				resourceName = "NormalTexture";
+			}
+			else if (textureType == eTextureType::ROUGHNESS)
+			{
+				resourceName = "RoughnessTexture";
+			}
+			else if (textureType == eTextureType::METALNESS)
+			{
+				resourceName = "MetalnessTexture";
+			}
+			else if (textureType == eTextureType::AMBIENT)
+			{
+				resourceName = "AOTexture";
+			}
+			else if (textureType == eTextureType::EMISSIVE)
+			{
+				resourceName = "EmissiveTexture";
+			}
+			else
+			{
+				DL_ASSERT("Found a invalid TextureType while loading DGFX");
+				assert(false && "Found a invalid TextureType while loading DGFX, RELEASE-ASSERT");
+			}
+
+
+			int textureLenght = 0;
+			aStream.read((char*)&textureLenght, sizeof(int)); //currentTexture.myFileName lenght
+			char* texture = new char[textureLenght+1];
+			aStream.read(texture, sizeof(char) * textureLenght); //currentTexture.myFileName
+			texture[textureLenght] = '\0';
+
+			surface.SetTexture(resourceName, texture, false);
+			delete texture;
+		}
+
+		aOutData->mySurfaces.Add(new Surface(surface));
+	}
+
+	void DGFXLoader::LoadModelAnimatedData(ModelAnimated* aOutData, Effect* aEffect, std::fstream& aStream)
+	{
+		int indexCount = 0;
+		aStream.read((char*)&indexCount, sizeof(int)); //Index count
+
+		unsigned int* indexData = new unsigned int[indexCount];
+		aStream.read((char*)(indexData), sizeof(int) * indexCount); //All index data
+
+		VertexIndexWrapper* indexWrapper = new VertexIndexWrapper();
+		indexWrapper->myFormat = DXGI_FORMAT_R32_UINT;
+		indexWrapper->myIndexData = (char*)indexData;
+		indexWrapper->mySize = indexCount * sizeof(unsigned int);
+		indexWrapper->myNumberOfIndices = indexCount;
+		aOutData->myIndexBaseData = indexWrapper;
+
+
+		int vertexCount = 0;
+		aStream.read((char*)&vertexCount, sizeof(int)); //Vertex count
+		int stride = 0;
+		aStream.read((char*)&stride, sizeof(int)); //Vertex stride
+
+		int sizeOfBuffer = vertexCount * stride * sizeof(float);
+		char* vertexRawData = new char[sizeOfBuffer];
+		aStream.read(vertexRawData, sizeOfBuffer); //All vertex data
+
+		VertexDataWrapper* vertexData = new VertexDataWrapper();
+		vertexData->myVertexData = vertexRawData;
+		vertexData->myNumberOfVertices = vertexCount;
+		vertexData->mySize = sizeOfBuffer;
+		vertexData->myStride = stride*sizeof(float);
+		aOutData->myVertexBaseData = vertexData;
 
 
 		int layoutCount = 0;
@@ -419,12 +528,7 @@ namespace Prism
 			else if (type == eVertexLayout::VERTEX_BONEID)
 			{
 				desc->SemanticName = "BONES";
-				desc->Format = DXGI_FORMAT_R32G32B32A32_UINT;
-			}
-			else if (type == eVertexLayout::VERTEX_COLOR)
-			{
-				desc->SemanticName = "COLOR";
-				desc->Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				desc->Format = DXGI_FORMAT_R32G32B32A32_SINT;
 			}
 			else
 			{
@@ -432,14 +536,16 @@ namespace Prism
 				assert(false && "Found a invalid InputElement while loading DGFX, RELEASE-ASSERT");
 			}
 
-			someInputElements.Add(desc);
+			aOutData->myVertexFormat.Add(desc);
 		}
 
-		aSurface.SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		aSurface.SetIndexCount(indexCount);
-		aSurface.SetVertexStart(0);
-		aSurface.SetIndexStart(0);
-		aSurface.SetVertexCount(vertexCount);
+		Surface surface;
+		surface.SetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		surface.SetIndexCount(indexCount);
+		surface.SetVertexStart(0);
+		surface.SetIndexStart(0);
+		surface.SetVertexCount(vertexCount);
+		surface.SetEffect(aEffect);
 
 		int textureCount = 0;
 		aStream.read((char*)&textureCount, sizeof(int)); //numberOfTextures
@@ -482,13 +588,15 @@ namespace Prism
 
 			int textureLenght = 0;
 			aStream.read((char*)&textureLenght, sizeof(int)); //currentTexture.myFileName lenght
-			char* texture = new char[textureLenght + 1];
+			char* texture = new char[textureLenght+1];
 			aStream.read(texture, sizeof(char) * textureLenght); //currentTexture.myFileName
 			texture[textureLenght] = '\0';
 
-			aSurface.SetTexture(resourceName, texture, false);
+			surface.SetTexture(resourceName, texture, false);
 			delete texture;
 		}
+
+		aOutData->mySurfaces.Add(new Surface(surface));
 	}
 
 	void DGFXLoader::LoadLodGroup(Model* aOutData, std::fstream& aStream)
@@ -511,7 +619,7 @@ namespace Prism
 		aOutData->SetLodGroup(lodGroup);
 	}
 
-	Animation* DGFXLoader::LoadAnimation(const std::string& aFBXPath, ModelAnimated* aOutData, std::fstream& aStream)
+	Animation* DGFXLoader::LoadAnimation(ModelAnimated* aOutData, std::fstream& aStream)
 	{
 		CU::Matrix44<float> bindMatrix;
 		aStream.read((char*)&bindMatrix.myMatrix[0], sizeof(float) * 16);
@@ -520,6 +628,7 @@ namespace Prism
 		LoadBoneHierarchy(rootBone, aStream);
 
 		Animation* newAnimation = new Animation();
+
 
 		int nrOfbones = 0;
 		aStream.read((char*)&nrOfbones, sizeof(int));
@@ -574,7 +683,6 @@ namespace Prism
 			aOutData->myAnimation = newAnimation;
 		}
 
-		myAnimations[aFBXPath] = newAnimation;
 		return newAnimation;
 	}
 
@@ -600,7 +708,6 @@ namespace Prism
 			{
 				HierarchyBone child;
 				LoadBoneHierarchy(child, aStream);
-				child.myParent = &aOutBone;
 				aOutBone.myChildren.Add(child);
 			}
 		}

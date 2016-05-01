@@ -13,7 +13,7 @@ namespace Prism
 
 	struct VertexPosColor
 	{
-		CU::Vector4<float> myPos;
+		CU::Vector3<float> myPos;
 		CU::Vector4<float> myCol;
 	};
 
@@ -44,12 +44,6 @@ namespace Prism
 		CU::Vector2<float> myUV;
 		CU::Vector3<float> myBiNormal;
 		CU::Vector3<float> myTangent;
-	};
-
-	struct GUIVertex
-	{
-		CU::Vector4<float> myPosition;
-		CU::Vector2<float> myUV;
 	};
 
 	struct VertexPosNormColor

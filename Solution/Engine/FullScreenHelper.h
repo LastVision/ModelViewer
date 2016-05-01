@@ -2,7 +2,6 @@
 
 #include "BaseModel.h"
 #include <D3DX11.h>
-#include "EffectListener.h"
 
 struct ID3DX11EffectShaderResourceVariable;
 struct ID3D11ShaderResourceView;
@@ -13,51 +12,13 @@ namespace Prism
 	class Effect;
 	class Texture;
 
-	struct CombineData : public EffectListener
-	{
-		Effect* myEffect = nullptr;
-		ID3DX11EffectShaderResourceVariable* mySourceA = nullptr;
-		ID3DX11EffectShaderResourceVariable* myDepthA = nullptr;
-		ID3DX11EffectShaderResourceVariable* mySourceB = nullptr;
-		ID3DX11EffectShaderResourceVariable* myDepthB = nullptr;
-
-		void OnEffectLoad() override;
-
-	};
-
-	struct RenderToTextureData : public EffectListener
-	{
-		Effect* myEffect = nullptr;
-		ID3DX11EffectShaderResourceVariable* mySource = nullptr;
-		ID3DX11EffectShaderResourceVariable* myDepth = nullptr;
-
-		void OnEffectLoad() override;
-	};
-
-	struct BloomData : public EffectListener
-	{
-		Effect* myBloomEffect;
-		ID3DX11EffectShaderResourceVariable* myBloomVariable;
-		ID3DX11EffectScalarVariable* myTexelWidthVariable;
-		ID3DX11EffectScalarVariable* myTexelHeightVariable;
-		Texture* myMiddleMan;
-		Texture* myFinalTexture;
-
-		Effect* myDownSampleEffect;
-		ID3DX11EffectShaderResourceVariable* myDownSampleVariable;
-
-		Texture* myDownSampleTextures[2];
-
-		void OnEffectLoad() override;
-	};
-
 	class FullScreenHelper : public BaseModel
 	{
 	public:
 		FullScreenHelper();
 		~FullScreenHelper();
 
-		void Process(Texture* aSource, Texture* aTarget, Texture* aEmissiveTexture, int aEffect);
+		void Process(Texture* aSource, Texture* aTarget, int aEffect);
 		void CopyTexture(Texture* aSource, Texture* aTarget);
 		void CombineTextures(Texture* aSourceA, Texture* aSourceB, Texture* aTarget, bool aUseDepth);
 		void FullScreenHelper::CombineTextures(Texture* aSourceA, Texture* aDepthA
@@ -68,6 +29,36 @@ namespace Prism
 		void OnResize(float aWidth, float aHeight);
 
 	private:
+		struct CombineData
+		{
+			Effect* myEffect = nullptr;
+			ID3DX11EffectShaderResourceVariable* mySourceA = nullptr;
+			ID3DX11EffectShaderResourceVariable* myDepthA = nullptr;
+			ID3DX11EffectShaderResourceVariable* mySourceB = nullptr;
+			ID3DX11EffectShaderResourceVariable* myDepthB = nullptr;
+		};
+		struct RenderToTextureData
+		{
+			Effect* myEffect = nullptr;
+			ID3DX11EffectShaderResourceVariable* mySource = nullptr;
+			ID3DX11EffectShaderResourceVariable* myDepth = nullptr;
+		};
+		struct BloomData
+		{
+			Effect* myBloomEffect;
+			ID3DX11EffectShaderResourceVariable* myBloomVariable;
+			ID3DX11EffectScalarVariable* myTexelWidthVariable;
+			ID3DX11EffectScalarVariable* myTexelHeightVariable;
+			Texture* myMiddleMan;
+			Texture* myFinalTexture;
+
+			Effect* myDownSampleEffect;
+			ID3DX11EffectShaderResourceVariable* myDownSampleVariable;
+
+			Texture* myDownSampleTextures[2];
+		};
+
+		
 		
 		void CreateCombineData();
 		void CreateRenderToTextureData();
@@ -78,8 +69,8 @@ namespace Prism
 		void Render(Effect* aEffect);
 		void Render(Effect* aEffect, const std::string& aTechnique);
 
-		void DownSample(Texture* aTarget, Texture* aSource, float aWidth, float aHeight, const std::string& aTechnique);
-		void BloomEffect(Texture* aSource, const std::string& aTechnique);
+		void DownSample(Texture* aTarget, Texture* aSource, float aWidth, float aHeight);
+		void BloomEffect(Texture* aSource);
 		void DoBloom(Texture* aSource, Texture* aTarget);
 
 		CombineData myCombineData;

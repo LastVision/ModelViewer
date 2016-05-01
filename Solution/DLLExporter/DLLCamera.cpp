@@ -12,7 +12,8 @@ DLLCamera::DLLCamera(CU::Vector2<float>& aWindowSize, float aMovementSpeed, floa
 	, myRotationSpeed(aRotationSpeed)
 	, myZoomSpeed(aZoomSpeed)
 {
-	myOrientation.SetPos({ 0, 0, 0 });
+	myOrientation = CU::Matrix44f::CreateRotateAroundX(0.97738438f);
+	myOrientation.SetPos({ 0, 75, -50 });
 	myOriginalOrientation = myOrientation;
 	myCamera = new Prism::Camera(myOrientation);
 	myCamera->OnResize(aWindowSize.x, aWindowSize.y);
@@ -64,11 +65,6 @@ void DLLCamera::Rotate(float aDeltaTime, float aMouseSens)
 			* myRotationSpeed * aDeltaTime);
 		myOrientation = rotationAroundObject;
 	}
-}
-
-void DLLCamera::Update(float aDeltaTime)
-{
-	myCamera->Update(aDeltaTime);
 }
 
 void DLLCamera::ResetCamera()

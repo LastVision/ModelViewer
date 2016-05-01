@@ -10,33 +10,18 @@
 namespace Prism
 {
 
-	SpotLight::SpotLight(unsigned int aGID, bool aShouldDoInstance)
-		: myGID(aGID)
-		, myRange(0)
-		, myCone(0)
-		, myLightMesh(nullptr)
+	void SpotLight::Initiate()
 	{
-		if (aShouldDoInstance == true)
-		{
-			ModelProxy* model = ModelLoader::GetInstance()->LoadModel("Data/Resource/Model/Light_mesh/SM_cone.fbx"
-				, "Data/Resource/Shader/S_effect_deferred_light_mesh_spot.fx");
-			myLightMesh = new Instance(*model, myOrientation);
-		}
+		myObjectCullingRadius = 10.f;
+		ModelProxy* model = ModelLoader::GetInstance()->LoadCube(1, 1, 1);
+		myInstance = new Instance(*model, myOrientation, eOctreeType::NOT_IN_OCTREE, myObjectCullingRadius);
 	}
 
-
-	SpotLight::~SpotLight()
+	void SpotLight::Render(Camera* aCamera)
 	{
-		SAFE_DELETE(myLightMesh);
-	}
-
-	void SpotLight::Render(const Camera& aCamera)
-	{
-		if (myLightMesh != nullptr)
+		if (myInstance != nullptr)
 		{
-			myOrientation.SetPos(myPosition);
-			myLightMesh->Render(aCamera);
-			myOrientation.SetPos(CU::Vector3<float>(0.f, 0.f, 0.f));
+			myInstance->Render(*aCamera);
 		}
 	}
 

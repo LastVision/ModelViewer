@@ -1,0 +1,13 @@
+p:\GitHub\ModelViewer\Solution\ModelViewer\Workbed\Release\ModelViewer.exe.config
+p:\GitHub\ModelViewer\Solution\ModelViewer\Workbed\Release\ModelViewer.exe
+p:\GitHub\ModelViewer\Solution\ModelViewer\Workbed\Release\ModelViewer.pdb
+p:\GitHub\ModelViewer\Solution\Workbed\Release\ModelViewer.exe.config
+p:\GitHub\ModelViewer\Workbed\bin\ModelViewer.exe.config
+p:\GitHub\ModelViewer\Workbed\bin\ModelViewer.exe
+p:\GitHub\ModelViewer\Workbed\bin\ModelViewer.pdb
+p:\GitHub\ModelViewer\Solution\ModelViewer\ModelViewer\obj\Release\ModelViewer.csprojResolveAssemblyReference.cache
+p:\GitHub\ModelViewer\Solution\ModelViewer\ModelViewer\obj\Release\ModelViewer.ModelViewerWindow.resources
+p:\GitHub\ModelViewer\Solution\ModelViewer\ModelViewer\obj\Release\ModelViewer.Properties.Resources.resources
+p:\GitHub\ModelViewer\Solution\ModelViewer\ModelViewer\obj\Release\ModelViewer.csproj.GenerateResource.Cache
+p:\GitHub\ModelViewer\Solution\ModelViewer\ModelViewer\obj\Release\ModelViewer.exe
+p:\GitHub\ModelViewer\Solution\ModelViewer\ModelViewer\obj\Release\ModelViewer.pdb

@@ -9,7 +9,6 @@ namespace Prism
 		: myKeyFrames(4)
 		, myStartTime(-1)
 		, myEndTime(-1)
-		, myFPS(0.f)
 	{
 	}
 

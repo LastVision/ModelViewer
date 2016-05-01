@@ -5,6 +5,7 @@
 #include "DLLExport.h"
 #include "DLLModel.h"
 #include <Engine.h>
+#include <FileWatcher.h>
 #include <SetupInfo.h>
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -30,14 +31,14 @@ void Render()
 	locDLLApplication->Render();
 }
 
-void RenderScene()
-{
-	locDLLApplication->RenderScene();
-}
-
 void Update()
 {
 	locDLLApplication->Update();
+}
+
+void UpdateFilewatcher()
+{
+	Prism::FileWatcher::GetInstance()->CheckFiles();
 }
 
 void RotateObjectAtX(float aSpeed)
@@ -158,25 +159,9 @@ float GetDirectionaLightZRotation()
 	return locDLLApplication->GetDirectionalLightRotation().z;
 }
 
-void RemoveActiveModel()
-{
-	locDLLApplication->RemoveActiveModel();
-}
-
 void LoadModel(const char* aModelFile, const char* aShaderFile)
 {
 	locDLLApplication->LoadModel(aModelFile, aShaderFile);
-}
-
-void LoadParticle(const char* aParticleFile)
-{
-	locDLLApplication->LoadParticle(aParticleFile);
-	DL_DEBUG("Loaded Particle %s", aParticleFile);
-}
-
-void LoadParticle(struct ToolParticleData aParticleDataStruct)
-{
-
 }
 
 void SetClearColor(float aRChannel, float aGChannel, float aBChannel, float aAChannel)

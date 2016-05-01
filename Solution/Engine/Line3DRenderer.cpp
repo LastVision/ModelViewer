@@ -14,16 +14,19 @@ namespace Prism
 		, myVertexBuffer(nullptr)
 		, myVertexBufferDesc(new D3D11_BUFFER_DESC())
 		, myInputLayout(nullptr)
-		, myIndexBufferDesc(nullptr)
 	{
 		myPrimitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+		ModelLoader::GetInstance()->Pause();
 		InitVertexBuffer();
 		myEffect = EffectContainer::GetInstance()->GetEffect("Data/Resource/Shader/S_effect_line3d.fx");
 		CreateInputLayout();
+		ModelLoader::GetInstance()->UnPause();
 	}
+
 
 	Line3DRenderer::~Line3DRenderer()
 	{
+		SAFE_DELETE(myEffect);
 		SAFE_DELETE(myVertexBuffer);
 		SAFE_DELETE(myVertexBufferDesc);
 		if (myInputLayout != nullptr)
@@ -115,7 +118,7 @@ namespace Prism
 		myVertexBuffer->myNumberOfBuffers = 1;
 
 
-		ZeroMemory(myVertexBufferDesc, sizeof(*myVertexBufferDesc));
+		ZeroMemory(myVertexBufferDesc, sizeof(myVertexBufferDesc));
 		myVertexBufferDesc->Usage = D3D11_USAGE_DYNAMIC;
 		myVertexBufferDesc->BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		myVertexBufferDesc->CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;

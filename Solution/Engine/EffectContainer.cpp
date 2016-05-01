@@ -5,7 +5,7 @@
 #include "Engine.h"
 #include "Effect.h"
 #include "EffectContainer.h"
-#include "SpotLightShadow.h"
+#include "FileWatcher.h"
 #include "Texture.h"
 #include "TextureContainer.h"
 
@@ -46,8 +46,6 @@ namespace Prism
 		if (it == myEffects.end())
 		{
 			LoadEffect(aFilePath);
-
-			myFilewatcher.WatchFileChangeWithDependencies(aFilePath, std::bind(&EffectContainer::ReloadShader, this, std::placeholders::_1));
 		}
 
 		return myEffects[aFilePath];
@@ -81,7 +79,27 @@ namespace Prism
 		DL_ASSERT_EXP(newEffect != nullptr, "newEffect is nullpter in LoadEffect, HOW?");
 
 		myEffects[aFilePath] = newEffect;
-		myEffectArrays.Add(newEffect);
+
+		WATCH_FILE(aFilePath, EffectContainer::ReloadEffect);
+	}
+
+	void EffectContainer::ReloadEffect(const std::string& aFilePath)
+	{
+		if (myEffects.find(aFilePath) == myEffects.end())
+		{
+			return;
+		}
+
+		myEffects[aFilePath]->Init(aFilePath);
+
+
+		Texture* tex = TextureContainer::GetInstance()->GetTexture(myCubeMap);
+		ID3DX11EffectShaderResourceVariable* shaderVar = myEffects[aFilePath]->GetEffect()->GetVariableByName("CubeMap")->AsShaderResource();
+
+		if (shaderVar->IsValid())
+		{
+			shaderVar->SetResource(tex->GetShaderView());
+		}
 	}
 
 	void EffectContainer::VerifyShader(const std::string& aFilePath)
@@ -89,36 +107,18 @@ namespace Prism
 		DL_ASSERT_EXP(aFilePath == "Data/Resource/Shader/S_effect_pbl.fx"
 			|| aFilePath == "Data/Resource/Shader/S_effect_pbl_animated.fx"
 			|| aFilePath == "Data/Resource/Shader/S_effect_font.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_font3d.fx"
 			|| aFilePath == "Data/Resource/Shader/S_effect_sprite.fx"
 			|| aFilePath == "Data/Resource/Shader/S_effect_debug.fx"
+			|| aFilePath == "Data/Resource/Shader/S_effect_terrain.fx"
 			|| aFilePath == "Data/Resource/Shader/S_effect_no_texture.fx"
 			|| aFilePath == "Data/Resource/Shader/S_effect_no_texture_animated.fx"
 			|| aFilePath == "Data/Resource/Shader/S_effect_no_texture.fx"
 			|| aFilePath == "Data/Resource/Shader/S_effect_line3d.fx"
 			|| aFilePath == "Data/Resource/Shader/S_effect_cube3d.fx"
+			|| aFilePath == "Data/Resource/Shader/S_effect_ice.fx"
 			|| aFilePath == "Data/Resource/Shader/S_effect_particle.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_combine.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_down_sample.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_bloom.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_render_to_texture.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_cube_colored.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_pbldebug.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_3dgui.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_deferred_ambient.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_deferred_light_mesh_point.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_deferred_light_mesh_spot.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_deferred_light_mesh_spot_textureprojection.fx"
-			|| aFilePath == "Data/Resource/Shader/S_effect_pbl_deferred.fx"
+			|| aFilePath == "Data/Resource/Shader/S_effect_selection.fx"
 			, CU::Concatenate("Found invalid Shader: %s", aFilePath.c_str()));
-	}
-
-	void EffectContainer::ReloadShader(const std::string& aFilePath)
-	{
-		if (myEffects.find(aFilePath) != myEffects.end())
-		{
-			myEffects[aFilePath]->Init(aFilePath);
-		}
 	}
 
 	std::string EffectContainer::GetCSOPath(const std::string& aFXPath)
@@ -135,11 +135,9 @@ namespace Prism
 
 	void EffectContainer::Update(const float aDeltaTime)
 	{
-		myFilewatcher.FlushChanges();
-
-		for (int i = 0; i < myEffectArrays.Size(); ++i)
+		for (auto it = myEffects.begin(); it != myEffects.end(); ++it)
 		{
-			myEffectArrays[i]->UpdateTime(aDeltaTime);
+			it->second->UpdateTime(aDeltaTime);
 		}
 	}
 
@@ -148,25 +146,16 @@ namespace Prism
 		if (aFilePath != myCubeMap)
 		{
 			myCubeMap = aFilePath;
-			for (int i = 0; i < myEffectArrays.Size(); ++i)
+			for (auto it = myEffects.begin(); it != myEffects.end(); ++it)
 			{
 				Texture* tex = TextureContainer::GetInstance()->GetTexture(myCubeMap);
-				ID3DX11EffectShaderResourceVariable* shaderVar = myEffectArrays[i]->GetEffect()->GetVariableByName("CubeMap")->AsShaderResource();
+				ID3DX11EffectShaderResourceVariable* shaderVar = it->second->GetEffect()->GetVariableByName("CubeMap")->AsShaderResource();
 
 				if (shaderVar->IsValid())
 				{
 					shaderVar->SetResource(tex->GetShaderView());
 				}
 			}
-		}
-	}
-
-	void EffectContainer::SetShadowDepth(SpotLightShadow* aShadowSpotLight)
-	{
-		for (int i = 0; i < myEffectArrays.Size(); ++i)
-		{
-			myEffectArrays[i]->SetShadowMVP(aShadowSpotLight->GetMVP());
-			myEffectArrays[i]->SetShadowDepthTexture(aShadowSpotLight->GetTexture());
 		}
 	}
 }
