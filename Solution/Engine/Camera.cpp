@@ -19,7 +19,6 @@ namespace Prism
 		, myCurrentShakeTime(0.f)
 	{
 		myFrustum = new Frustum(aPlayerMatrix, myNear, myFar);
-		WATCH_FILE("Data/Setting/SET_camera.xml", Camera::ReadXML);
 		ReadXML("Data/Setting/SET_camera.xml");
 	}
 

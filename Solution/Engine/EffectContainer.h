@@ -2,6 +2,11 @@
 #include <string>
 #include <unordered_map>
 
+namespace CU
+{
+	class FileWatcher;
+};
+
 namespace Prism
 {
 	class Effect;
@@ -16,6 +21,7 @@ namespace Prism
 		void Update(const float aDeltaTime);
 		void SetCubeMap(const std::string& aFilePath);	
 
+		void SetFileWatcher(CU::FileWatcher* aFileWatcher);
 	private:
 		EffectContainer(){};
 		~EffectContainer();
@@ -28,6 +34,8 @@ namespace Prism
 
 		std::unordered_map<std::string, Effect*> myEffects;
 		std::string myCubeMap;
+
+		CU::FileWatcher* myFilewatcher;
 
 		static EffectContainer* myInstance;
 	};

@@ -1,120 +1,233 @@
 #include "stdafx.h"
+
 #include "FileWatcher.h"
+#include <fstream>
 
-
-namespace Prism
+namespace CU
 {
-	FileWatcher* FileWatcher::myInstance = nullptr;
-
-	FileWatcher* FileWatcher::GetInstance()
-	{
-		if (myInstance == nullptr)
-		{
-			myInstance = new FileWatcher();
-		}
-
-		return myInstance;
-	}
-
-	void FileWatcher::Destroy()
-	{
-		delete myInstance;
-	}
-
 	FileWatcher::FileWatcher()
+		: myThread(nullptr)
+		, myShouldEndThread(false)
+		, myThreadIsDone(false)
 	{
-		myFileDatas.Init(256);
+
 	}
 
-	void FileWatcher::WatchFile(const std::string& aFile, std::function<void()> aCallBack)
+	FileWatcher::~FileWatcher()
 	{
-
-#ifdef DLL_EXPORT
-		WIN32_FIND_DATA findData;
-		HANDLE findHandle = FindFirstFile(aFile.c_str(), &findData);
-		if (findHandle != INVALID_HANDLE_VALUE)
+		myShouldEndThread = true;
+		while (!myThreadIsDone)
 		{
-			FileData newData;
-			newData.myCallBack = aCallBack;
-			newData.myFilePath = aFile;
-			newData.myFileTime = findData.ftLastWriteTime;
-			myFileDatas.Add(newData),
-
-				FindClose(findHandle);
-		}
-		else
-		{
-			ENGINE_LOG("[FileWatcher]: Tried to watch a file that couldnt be found, %s", aFile.c_str());
-			DL_MESSAGE_BOX("Failed to watch file", "[FileWatcher]", MB_ICONWARNING);
+			Sleep(1);
 		}
 
-#define FILE_WATCHER_ACTIVE
-#endif
-
-#ifndef RELEASE_BUILD
-#ifndef FILE_WATCHER_ACTIVe
-		WIN32_FIND_DATA findData;
-		HANDLE findHandle = FindFirstFile(aFile.c_str(), &findData);
-		if (findHandle != INVALID_HANDLE_VALUE)
-		{
-			FileData newData;
-			newData.myCallBack = aCallBack;
-			newData.myFilePath = aFile;
-			newData.myFileTime = findData.ftLastWriteTime;
-			myFileDatas.Add(newData),
-
-				FindClose(findHandle);
-		}
-		else
-		{
-			ENGINE_LOG("[FileWatcher]: Tried to watch a file that couldnt be found, %s", aFile.c_str());
-			DL_MESSAGE_BOX("Failed to watch file", "[FileWatcher]", MB_ICONWARNING);
-		}
-#endif
-#endif
+		myThread->join();
+		SAFE_DELETE(myThread);
 	}
 
-	void FileWatcher::UnWatchFile(const std::string& aFile)
+	void FileWatcher::FlushChanges()
 	{
-		for (int i = 0; i < myFileDatas.Size(); ++i)
+		std::lock_guard<std::mutex> guard(myMutex);
+
+
+		myFileChanged.swap(myFileChangedThreaded);
+
+		for (std::string& theString : myFileChanged)
 		{
-			if (myFileDatas[i].myFilePath == aFile)
+			std::string directoryOfFile(theString);
+			directoryOfFile = directoryOfFile.substr(0, directoryOfFile.find_last_of("\\/"));
+
+			std::string theFile(theString);
+			theFile = theFile.substr(theFile.find_last_of("\\/") + 1, theFile.size());
+
+			std::vector<callback_function_file> callbacks = myCallbacks[theFile];
+			for (unsigned int i = 0; i < callbacks.size(); i++)
 			{
-				myFileDatas.RemoveCyclicAtIndex(i);
+				if (callbacks[i])
+				{
+					callbacks[i](theString);
+				}
+			}
+		}
+
+
+		myFileChanged.clear();
+
+
+	}
+
+	void FileWatcher::UpdateChanges(const std::string& aDir)
+	{
+		const DWORD timeOut = 1000;
+		while (!myShouldEndThread)
+		{
+			HANDLE  ChangeHandle = FindFirstChangeNotification(aDir.c_str(), FALSE, FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_ACTION_ADDED | FILE_ACTION_REMOVED | FILE_ACTION_MODIFIED);
+			DWORD Wait = WaitForSingleObject(ChangeHandle, timeOut);
+			if (Wait == WAIT_OBJECT_0)
+			{
+				myMutex.lock();
+				OnFolderChange(aDir);
+				FindNextChangeNotification(ChangeHandle);
+				myMutex.unlock();
+			}
+
+			Sleep(1);
+		}
+		myThreadIsDone = true;
+	}
+
+	void FileWatcher::OnFolderChange(const std::string& aDir)
+	{
+		std::vector<WIN32_FIND_DATA> currentFolderFiles = GetAllFilesInFolder(aDir);
+		std::vector<WIN32_FIND_DATA>& savedFolderFiles = myFolders[aDir];
+
+		for (WIN32_FIND_DATA& currentFile : currentFolderFiles)
+		{
+			for (WIN32_FIND_DATA& savedFile : savedFolderFiles)
+			{
+				if (std::string(currentFile.cFileName).compare(savedFile.cFileName) == 0)
+				{
+					ULARGE_INTEGER currentFileTime;
+					SYSTEMTIME currentFileTimeSystem;
+					FileTimeToSystemTime(&currentFile.ftLastWriteTime, &currentFileTimeSystem);
+					currentFileTime.LowPart = currentFile.ftLastWriteTime.dwLowDateTime;
+					currentFileTime.HighPart = currentFile.ftLastWriteTime.dwHighDateTime;
+					__int64 currentFileTime64 = currentFileTime.QuadPart;
+
+					ULARGE_INTEGER savedFileTime;
+					SYSTEMTIME savedFileTimeSystem;
+					FileTimeToSystemTime(&savedFile.ftLastWriteTime, &savedFileTimeSystem);
+					savedFileTime.LowPart = savedFile.ftLastWriteTime.dwLowDateTime;
+					savedFileTime.HighPart = savedFile.ftLastWriteTime.dwHighDateTime;
+					__int64 savedFileTime64 = savedFileTime.QuadPart;
+
+					if (currentFileTime64 != savedFileTime64)
+					{
+						std::string fileThatChangedPath = aDir + "/" + std::string(currentFile.cFileName);
+						bool isDependency = myDependencies.find(fileThatChangedPath) != myDependencies.end();
+						if (isDependency)
+						{
+							std::vector<std::string>& deps = myDependencies[fileThatChangedPath];
+							for (std::string& file : deps)
+							{
+								OnFileChange(file);
+							}
+
+						}
+						else
+						{
+							OnFileChange(fileThatChangedPath);
+						}
+
+						// We have a change
+
+						savedFile = currentFile;
+					}
+				}
+			}
+		}
+	}
+
+	void FileWatcher::OnFileChange(std::string& aFile)
+	{
+		for (unsigned int i = 0; i < myFileChangedThreaded.size(); i++)
+		{
+			if (myFileChangedThreaded[i].compare(aFile) == 0)
+			{
 				return;
 			}
 		}
+		myFileChangedThreaded.push_back(aFile);
+
 	}
 
-	void FileWatcher::CheckFiles()
+	bool FileWatcher::WatchFileChangeWithDependencies(std::string aFile, callback_function_file aFunctionToCallOnChange)
 	{
-		for (int i = 0; i < myFileDatas.Size(); ++i)
+		std::ifstream stream(aFile);
+		if (!stream.good())
 		{
-			WIN32_FIND_DATA findData;
-			HANDLE findHandle = FindFirstFile(myFileDatas[i].myFilePath.c_str(), &findData);
-			if (findHandle != INVALID_HANDLE_VALUE)
+			stream.close();
+			return false;
+		}
+
+		std::string directoryOfFile(aFile);
+		directoryOfFile = directoryOfFile.substr(0, directoryOfFile.find_last_of("\\/"));
+
+		std::string line;
+		const std::string includeString = "include";
+		while (getline(stream, line))
+		{
+			std::size_t found = line.find(includeString);
+			if (found != std::string::npos)
 			{
-				if (CompareFileTime(&myFileDatas[i].myFileTime, &findData.ftLastWriteTime) != 0)
+				std::string foundFile(line);
+				foundFile = foundFile.substr(foundFile.find_first_of("\"") + 1, foundFile.size());
+				foundFile = foundFile.substr(0, foundFile.find_last_of("\""));
+				if (!foundFile.empty())
 				{
-					Sleep(100);
-					myFileDatas[i].myFileTime = findData.ftLastWriteTime;
-					myFileDatas[i].myCallBack();
+					std::string depFile = directoryOfFile + "/" + foundFile;
+					WatchFileChange(depFile, aFunctionToCallOnChange);
+					myDependencies[depFile].push_back(aFile);
 				}
-
-
-				FindClose(findHandle);	
-			}
-			else
-			{
-				ENGINE_LOG("[FileWatcher]: Tried to check a file that couldnt be found, %s", myFileDatas[i].myFilePath.c_str());
-				DL_MESSAGE_BOX("Failed to check file", "[FileWatcher]", MB_ICONWARNING);
 			}
 		}
+
+		stream.close();
+		return WatchFileChange(aFile, aFunctionToCallOnChange);
 	}
 
-	void FileWatcher::Clear()
+	bool FileWatcher::WatchFileChange(std::string aFile, callback_function_file aFunctionToCallOnChange)
 	{
-		myFileDatas.RemoveAll();
+		std::ifstream stream(aFile);
+		if (!stream.good())
+		{
+			stream.close();
+			return false;
+		}
+		stream.close();
+
+		std::string directoryOfFile(aFile);
+		directoryOfFile = directoryOfFile.substr(0, directoryOfFile.find_last_of("\\/"));
+
+		std::string theFile(aFile);
+		theFile = theFile.substr(theFile.find_last_of("\\/") + 1, theFile.size());
+
+		myCallbacks[theFile].push_back(aFunctionToCallOnChange);
+		return WatchDirectory(directoryOfFile);
 	}
 
+	bool FileWatcher::WatchDirectory(const std::string& aDir)
+	{
+		FolderMap::iterator iter = myFolders.find(aDir);
+		if (iter != myFolders.end())
+		{
+			//Already in our watch list
+			return true;
+		}
+
+		myFolders[aDir] = GetAllFilesInFolder(aDir);
+
+		myThread = new std::thread(&FileWatcher::UpdateChanges, this, aDir);
+		return true;
+	}
+
+	std::vector<WIN32_FIND_DATA> FileWatcher::GetAllFilesInFolder(std::string aDir)
+	{
+		std::vector<WIN32_FIND_DATA> filesInFolder;
+		aDir += "/*.*";
+		WIN32_FIND_DATA fd;
+
+		HANDLE hFind = ::FindFirstFile(aDir.c_str(), &fd);
+		if (hFind != INVALID_HANDLE_VALUE) {
+			do {
+				// read all (real) files in current folder
+				// , delete '!' read other 2 default folder . and ..
+				if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+					filesInFolder.push_back(fd);
+				}
+			} while (::FindNextFile(hFind, &fd));
+			::FindClose(hFind);
+		}
+		return filesInFolder;
+	}
 }

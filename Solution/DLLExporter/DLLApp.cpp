@@ -17,26 +17,37 @@
 #include <SetupInfo.h>
 #include <TimerManager.h>
 #include <CommonHelper.h>
+#include <TextureContainer.h>
+#include <EffectContainer.h>
 
 #define EngineInstance Prism::Engine::GetInstance()
 #define InputInstance CU::InputWrapper::GetInstance()
 
-DLLApp::DLLApp(int* aHwnd, Prism::SetupInfo& aWindowSetup, WNDPROC aWindowProc)
+DLLApp::DLLApp(int* aHwnd, Prism::SetupInfo& aWindowSetup, WNDPROC aWindowProc, CU::FileWatcher& aFileWatcher)
+	: myFileWatcher(aFileWatcher)
 {
 	DL_Debug::Debug::Create();;
 	CU::TimerManager::Create();
-
+	DL_DEBUG("DLL APP 0");
 	myPanelWindowHandler = (HWND)aHwnd;
+	Prism::EffectContainer::GetInstance()->SetFileWatcher(&myFileWatcher);
+	Prism::TextureContainer::GetInstance()->SetFileWatcher(&myFileWatcher);
 	Prism::Engine::Create(myEngineWindowHandler, aWindowProc, aWindowSetup);
+	DL_DEBUG("DLL APP 1");
 
 	SetupLight();
 	SetupInput();
 	SetParentWindow(aWindowSetup);
 	SetupCubeMap();
+	DL_DEBUG("DLL APP 2");
 
 	CU::Vector2<float> windowSize(aWindowSetup.myScreenWidth, aWindowSetup.myScreenHeight);
 	myCamera = new DLLCamera(windowSize, 1.0f, 1.0f, 1.0f);
 	myModel = new DLLModel();
+	DL_DEBUG("DLL APP 3");
+
+	DL_DEBUG("DLL APP 4");
+
 }
 
 DLLApp::~DLLApp()
@@ -50,6 +61,7 @@ DLLApp::~DLLApp()
 
 void DLLApp::Render()
 {
+	
 	Prism::Engine::GetInstance()->Render();
 
 	myDirectionalLight->Update();
@@ -71,16 +83,18 @@ void DLLApp::Update()
 	float deltaTime = CU::TimerManager::GetInstance()->GetMasterTimer().GetTime().GetFrameTime();
 	CU::InputWrapper::GetInstance()->Update();
 	LogicUpdate(deltaTime);
+	myCamera->GetCamera()->Update(deltaTime);
 }
 
-void DLLApp::LoadModel(const char* aModelFile, const char* aShaderFile)
+void DLLApp::LoadModel(const std::string& aModelFile, const std::string& aShaderFile)
 {
 	std::string shaderFile = CU::GetRealDataFolderFilePath(aShaderFile, "fx");
-	DL_DEBUG(shaderFile.c_str());
-	
-	myModel->LoadModel(aModelFile, shaderFile.c_str());
+
+	myModel->LoadModel(aModelFile.c_str(), shaderFile.c_str());
 	myModelFile = aModelFile;
 	myShaderFile = shaderFile;
+
+	myFileWatcher.WatchFileChange(myModelFile, std::bind(&DLLApp::LoadModel, this, aModelFile, aShaderFile));
 }
 
 void DLLApp::SetClearColor(CU::Vector4f& aClearColor)
@@ -119,7 +133,7 @@ void DLLApp::LogicUpdate(float aDeltaTime)
 
 void DLLApp::SetupCubeMap()
 {
-	Prism::EffectContainer::GetInstance()->SetCubeMap("Data/Resource/Texture/CubeMap/T_cubemap_test.dds");
+	Prism::EffectContainer::GetInstance()->SetCubeMap("Data/Resource/Texture/CubeMap/T_cubemap_level_01.dds");
 	EngineInstance->SetClearColor(CU::Vector4f(0.3f, 0.3f, 0.3f, 1.f));
 }
 

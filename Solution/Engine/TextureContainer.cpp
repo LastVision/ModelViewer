@@ -62,7 +62,7 @@ namespace Prism
 		myTextures[aFileName] = newTex;
 
 #ifdef DLL_EXPORT
-		WATCH_FILE(aFileName, Prism::TextureContainer::ReloadTexture);
+		myFileWatcher->WatchFileChange(aFileName, std::bind(&Prism::TextureContainer::ReloadTexture, this, aFileName));
 #endif
 	}
 
@@ -70,5 +70,10 @@ namespace Prism
 	{
 		myTextures[aFileName]->Release();
 		myTextures[aFileName]->LoadTexture(aFileName);
+	}
+
+	void TextureContainer::SetFileWatcher(CU::FileWatcher* aFileWatcher)
+	{
+		myFileWatcher = aFileWatcher;
 	}
 }

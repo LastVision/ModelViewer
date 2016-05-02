@@ -1,38 +1,50 @@
 #pragma once
-
-
-#define WATCH_FILE(FILE, FUNCTION) (Prism::FileWatcher::GetInstance()->WatchFile(FILE, std::bind(&FUNCTION, this, FILE)))
-#define UNWATCH_FILE(FILE) (Prism::FileWatcher::GetInstance()->UnWatchFile(FILE))
-
-#include <functional>
 #include <string>
+#include <functional>
+#include <map>
+#include <vector>
+#include <windows.h>
+#include <thread>
+#include <mutex>
 
-namespace Prism
+namespace CU
 {
+	typedef std::function<void(const std::string&)> callback_function_file;
+
 	class FileWatcher
 	{
 	public:
-		static FileWatcher* GetInstance();
-		static void Destroy();
-
-		void WatchFile(const std::string& aFile, std::function<void()> aCallBack);
-		void UnWatchFile(const std::string& aFile);
-
-		void CheckFiles();
-		void Clear();
-
-	private:
 		FileWatcher();
+		~FileWatcher();
 
-		struct FileData
-		{
-			std::string myFilePath;
-			std::function<void()> myCallBack;
-			FILETIME myFileTime;
-		};
+		/* Will check the file for includes and add them as well*/
+		bool WatchFileChangeWithDependencies(std::string aFile, callback_function_file aFunctionToCallOnChange);
+		bool WatchFileChange(std::string aFile, callback_function_file aFunctionToCallOnChange);
 
-		CU::GrowingArray<FileData> myFileDatas;
 
-		static FileWatcher* myInstance;
+		void FlushChanges();
+	private:
+		void UpdateChanges(const std::string& aDir);
+		void OnFolderChange(const std::string& aDir);
+		bool WatchDirectory(const std::string& aDir);
+		void OnFileChange(std::string& aFile);
+		std::vector<WIN32_FIND_DATA> GetAllFilesInFolder(std::string aDir);
+
+		std::thread* myThread;
+
+		typedef std::map<std::string, std::vector<WIN32_FIND_DATA>> FolderMap;
+		FolderMap myFolders;
+
+		std::vector<std::string> myFileChangedThreaded;
+		std::vector<std::string> myFileChanged;
+		std::map<std::string, std::vector<callback_function_file> > myCallbacks;
+
+		typedef std::map<std::string, std::vector<std::string>> Dependencies;
+		Dependencies myDependencies;
+
+		std::mutex myMutex;
+		bool myShouldEndThread;
+		bool myThreadIsDone;
 	};
+
 }

@@ -80,7 +80,7 @@ namespace Prism
 
 		myEffects[aFilePath] = newEffect;
 
-		WATCH_FILE(aFilePath, EffectContainer::ReloadEffect);
+		//myFilewatcher->WatchFileChangeWithDependencies(aFilePath, std::bind(&EffectContainer::ReloadEffect, this, aFilePath));
 	}
 
 	void EffectContainer::ReloadEffect(const std::string& aFilePath)
@@ -157,5 +157,10 @@ namespace Prism
 				}
 			}
 		}
+	}
+
+	void EffectContainer::SetFileWatcher(CU::FileWatcher* aFileWatcher)
+	{
+		myFilewatcher = aFileWatcher;
 	}
 }

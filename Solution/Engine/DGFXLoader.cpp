@@ -37,10 +37,12 @@ namespace Prism
 
 	Model* DGFXLoader::LoadModel(const std::string& aFilePath, Effect* aEffect)
 	{
+#ifndef DLL_EXPORT
 		if (myModels.find(aFilePath) != myModels.end())
 		{
 			return myModels[aFilePath];
 		}
+#endif
 
 		std::string dgfxFile = CU::GetGeneratedDataFolderFilePath(aFilePath, "dgfx");
 

@@ -7,15 +7,17 @@
 #include <Engine.h>
 #include <FileWatcher.h>
 #include <SetupInfo.h>
+#include <TextureContainer.h>
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 DLLApp* locDLLApplication;
 Prism::SetupInfo locWindowSetup;
+CU::FileWatcher locFileWatcher;
 
 void StartEngine(int* aHwnd)
 {
-	locDLLApplication = new DLLApp(aHwnd, locWindowSetup, WndProc);
+	locDLLApplication = new DLLApp(aHwnd, locWindowSetup, WndProc, locFileWatcher);
 }
 
 void SetupWindow(int aWidth, int aHeight)
@@ -38,7 +40,7 @@ void Update()
 
 void UpdateFilewatcher()
 {
-	Prism::FileWatcher::GetInstance()->CheckFiles();
+	locFileWatcher.FlushChanges();
 }
 
 void RotateObjectAtX(float aSpeed)

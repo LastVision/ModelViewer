@@ -31,19 +31,12 @@ void DLLModel::LoadModel(const char* aModelFile, const char* aShaderFile)
 		aShaderFile = "Data/Resource/Shader/S_effect_basic.fx";
 	}
 
-	WatchFiles(aModelFile, aShaderFile);
 	CU::Matrix44f currentOrientation = myOrientation;
 	delete myInstance;
 
 	Prism::ModelProxy* model = Prism::ModelLoader::GetInstance()->LoadModel(aModelFile, aShaderFile);
 
 	myInstance = new Prism::Instance(*model, myOrientation, Prism::eOctreeType::DYNAMIC, 1.f);
-}
-
-void DLLModel::WatchFiles(const char* aModelFile, const char* aShaderFile)
-{
-	Prism::FileWatcher::GetInstance()->Clear();
-	Prism::FileWatcher::GetInstance()->WatchFile(aModelFile, std::bind(&DLLModel::LoadModel, this, aModelFile, aShaderFile));
 }
 
 void DLLModel::AutoRotate(float aDeltaTime)

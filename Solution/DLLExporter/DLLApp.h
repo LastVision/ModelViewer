@@ -22,18 +22,19 @@ namespace Prism
 namespace CU
 {
 	class InputWrapper;
+	class FileWatcher;
 }
 
 class DLLApp
 {
 public:
-	DLLApp(int* aHwnd, Prism::SetupInfo& aWindowSetup, WNDPROC aWindowProc);
+	DLLApp(int* aHwnd, Prism::SetupInfo& aWindowSetup, WNDPROC aWindowProc, CU::FileWatcher& aFileWatcher);
 	~DLLApp();
 
 	void Render();
 	void Update();
 
-	void LoadModel(const char* aModelFile, const char* aShaderFile);
+	void LoadModel(const std::string& aModelFile, const std::string& aShaderFile);
 
 	void SetClearColor(CU::Vector4f& aClearColor);
 	void SetCubeMap(const char* aCubeMapFile);
@@ -65,6 +66,8 @@ private:
 	Prism::DirectionalLight* myDirectionalLight;
 	CU::StaticArray<Prism::DirectionalLightData, NUMBER_OF_DIRECTIONAL_LIGHTS> myDirectionalLightData;
 	Prism::Scene* myScene;
+
+	CU::FileWatcher& myFileWatcher;
 
 	CU::Vector3f myDirectionalLightRotation;
 

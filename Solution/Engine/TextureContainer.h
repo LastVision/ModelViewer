@@ -1,5 +1,10 @@
 #pragma once
 #include <unordered_map>
+namespace CU
+{
+	class FileWatcher;
+}
+
 namespace Prism
 {
 	class Texture;
@@ -12,7 +17,7 @@ namespace Prism
 
 
 		Texture* GetTexture(const std::string& aFileName);
-
+		void SetFileWatcher(CU::FileWatcher* aFileWatcher);
 	private:
 		TextureContainer(){};
 		~TextureContainer();
@@ -20,6 +25,8 @@ namespace Prism
 		void ReloadTexture(const std::string& aFileName);
 
 		std::unordered_map<std::string, Texture*> myTextures;
+
+		CU::FileWatcher* myFileWatcher;
 
 		static TextureContainer* myInstance;
 	};

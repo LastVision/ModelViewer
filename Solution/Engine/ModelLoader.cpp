@@ -200,10 +200,12 @@ namespace Prism
 
 	ModelProxy* ModelLoader::LoadModel(const std::string& aModelPath, const std::string& aEffectPath)
 	{
+#ifndef DLL_EXPORT
 		if (myModelProxies.find(aModelPath) != myModelProxies.end())
 		{
 			return myModelProxies[aModelPath];
 		}
+#endif
 
 		ModelProxy* proxy = new ModelProxy();
 		proxy->SetModel(nullptr);
@@ -349,7 +351,7 @@ namespace Prism
 			anim->myAnimation = myDGFXLoader->LoadAnimation(aPath);
 
 		#else
-			anim->myAnimation = myModelFactory->LoadAnimation(aPath);
+			anim->myAnimation = myModelFactory->LoadAnimation(aPath.c_str());
 		#endif
 #endif
 

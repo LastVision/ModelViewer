@@ -7,7 +7,7 @@
 #define OCTREE_WIDTH 10000.f
 
 //If we get random crashes in .exes undefine USE_DGFX
-#define USE_DGFX
+//#define USE_DGFX
 
 #ifdef USE_DGFX
 //#define CONVERT_TO_DGFX_IN_RUNTIME

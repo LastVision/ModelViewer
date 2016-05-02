@@ -52,7 +52,6 @@ namespace Prism
 
 		TextureContainer::Destroy();
 		EffectContainer::Destroy();
-		FileWatcher::Destroy();
 		AnimationSystem::Destroy();
 
 		ModelLoader::GetInstance()->ClearLoadJobs();
@@ -69,15 +68,19 @@ namespace Prism
 	{
 		myInstance = new Engine();
 		myInstance->mySetupInfo = &aSetupInfo;
-
+		DL_DEBUG("Engine Create 0");
 		bool result = myInstance->Init(aHwnd, aWndProc);
+		DL_DEBUG("Engine Create 1");
 
 		if (aSetupInfo.myWindowed == false)
 		{
 			myInstance->myDirectX->SetFullscreen(true);
 		}
+		DL_DEBUG("Engine Create 2");
 
 		myInstance->Render();
+		DL_DEBUG("Engine Create 3");
+
 		return result;
 	}
 
